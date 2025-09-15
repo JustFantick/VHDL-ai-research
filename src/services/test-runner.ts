@@ -79,7 +79,7 @@ export class TestRunner {
           model: modelConfig.name,
           timestamp: new Date(),
           testFileId: testFile.id,
-          response: JSON.stringify(analysis, null, 2),
+          response: analysis,
           processingTimeMs: processingTime,
           success: true,
         };
@@ -95,7 +95,11 @@ export class TestRunner {
           model: modelConfig.name,
           timestamp: new Date(),
           testFileId: testFile.id,
-          response: "",
+          response: {
+            issuesFound: [],
+            confidence: 0,
+            reasoning: error instanceof Error ? error.message : "Unknown error",
+          },
           processingTimeMs: 0,
           success: false,
           error: error instanceof Error ? error.message : "Unknown error",

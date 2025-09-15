@@ -26,7 +26,7 @@ export interface AIResponse {
   model: string;
   timestamp: Date;
   testFileId: string;
-  response: string;
+  response: AnalysisResult;
   processingTimeMs: number;
   success: boolean;
   error?: string;
