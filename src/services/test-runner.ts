@@ -1,7 +1,13 @@
 import fs from "fs-extra";
 import path from "path";
 import { AIProviderService } from "./ai-providers";
-import { VHDLTestFile, AIResponse, ModelConfig, TestConfig } from "../types";
+import {
+  VHDLTestFile,
+  AIResponse,
+  ModelConfig,
+  TestConfig,
+  AnalysisResult,
+} from "../types";
 
 export class TestRunner {
   private aiService: AIProviderService;

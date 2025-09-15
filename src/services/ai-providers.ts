@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { ModelConfig, AnalysisResult } from "../types";
+import { ModelConfig, AnalysisResult, StructuredIssue } from "../types";
 
 export class AIProviderService {
   private openai?: OpenAI;
@@ -52,18 +52,31 @@ export class AIProviderService {
     return `Analyze the following VHDL code for errors, inefficiencies, and potential improvements. Provide your analysis in JSON format with the following structure:
 
 {
-  "issuesFound": ["list of specific issues found"],
-  "suggestions": ["list of improvement suggestions"],
+  "issuesFound": [
+    {
+      "description": "specific issue description",
+      "lines": [{"start": 21, "end": 21}],
+      "category": "syntax|logic|style|performance",
+      "severity": "critical|high|medium|low",
+      "suggestions": ["specific suggestions to fix this issue"]
+    }
+  ],
   "confidence": 0.85,
   "reasoning": "brief explanation of your analysis"
 }
 
 Focus on:
-1. Syntax errors
-2. Logic errors
-3. Performance inefficiencies
-4. Code style issues
+1. Syntax errors (missing semicolons, undeclared variables, etc.)
+2. Logic errors (race conditions, overflow, dead states, etc.)
+3. Performance inefficiencies (inefficient algorithms, redundant operations)
+4. Code style issues (naming conventions, spacing, old-style constructs)
 5. Best practices violations
+
+For each issue, specify:
+- Line range where the issue occurs (start and end line numbers)
+- Appropriate category and severity level
+- Clear description of the problem
+- Specific suggestions to fix this particular issue
 
 VHDL Code:
 \`\`\`vhdl
@@ -147,9 +160,18 @@ Respond only with valid JSON.`;
         .trim();
       const parsed = JSON.parse(cleaned);
 
+      const issuesFound: StructuredIssue[] = (parsed.issuesFound || []).map(
+        (issue: any) => ({
+          description: issue.description || issue,
+          lines: issue.lines || [{ start: 0, end: 0 }],
+          category: issue.category || "style",
+          severity: issue.severity || "medium",
+          suggestions: issue.suggestions || [],
+        })
+      );
+
       return {
-        issuesFound: parsed.issuesFound || [],
-        suggestions: parsed.suggestions || [],
+        issuesFound,
         confidence: parsed.confidence || 0,
         reasoning: parsed.reasoning || "",
       };

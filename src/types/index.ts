@@ -1,8 +1,23 @@
+export interface LineReference {
+  start: number;
+  end: number;
+}
+
+export interface Issue {
+  id: string;
+  description: string;
+  lines: LineReference[];
+  category: "syntax" | "logic" | "style" | "performance";
+  severity: "critical" | "high" | "medium" | "low";
+  suggestions: string[];
+  reasoning: string;
+  isFalsePositive: boolean;
+}
+
 export interface VHDLTestFile {
   id: string;
   filename: string;
   content: string;
-  expectedIssues?: string[];
   category: "syntax" | "logic" | "efficiency" | "style" | "mixed";
   difficulty: "easy" | "medium" | "hard";
 }
@@ -17,9 +32,16 @@ export interface AIResponse {
   error?: string;
 }
 
-export interface AnalysisResult {
-  issuesFound: string[];
+export interface StructuredIssue {
+  description: string;
+  lines: LineReference[];
+  category: "syntax" | "logic" | "style" | "performance";
+  severity: "critical" | "high" | "medium" | "low";
   suggestions: string[];
+}
+
+export interface AnalysisResult {
+  issuesFound: StructuredIssue[];
   confidence: number;
   reasoning: string;
 }
