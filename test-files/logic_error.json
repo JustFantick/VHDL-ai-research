@@ -1,0 +1,60 @@
+{
+  "testFile": {
+    "id": "logic_error_vhd",
+    "filename": "logic_error.vhd",
+    "category": "logic",
+    "difficulty": "medium"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "overflow_issue",
+        "description": "Counter will overflow without bounds checking",
+        "lines": [{ "start": 21, "end": 21 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Add overflow check: 'if count < 15 then count <= count + 1; end if;'",
+          "Use modulo arithmetic: 'count <= (count + 1) mod 16;'",
+          "Reset counter when it reaches maximum value"
+        ],
+        "reasoning": "Counter will wrap around from 15 to 0, which may not be the intended behavior.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "missing_overflow_signal",
+        "description": "No indication when counter overflows",
+        "lines": [{ "start": 4, "end": 8 }],
+        "category": "logic",
+        "severity": "medium",
+        "suggestions": [
+          "Add overflow output port to signal when counter wraps around",
+          "Add carry output to indicate when maximum count is reached"
+        ],
+        "reasoning": "External logic may need to know when counter overflows for proper system operation.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "enable_timing",
+        "description": "Enable signal not synchronized with clock",
+        "lines": [{ "start": 20, "end": 22 }],
+        "category": "logic",
+        "severity": "medium",
+        "suggestions": [
+          "Synchronize enable signal with clock to avoid metastability",
+          "Add enable synchronization register"
+        ],
+        "reasoning": "Asynchronous enable signal can cause metastability issues.",
+        "isFalsePositive": false
+      }
+    ],
+    "metadata": {
+      "totalIssues": 3,
+      "criticalIssues": 0,
+      "highIssues": 1,
+      "mediumIssues": 2,
+      "lowIssues": 0,
+      "categories": ["logic"]
+    }
+  }
+}

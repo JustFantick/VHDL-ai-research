@@ -1,0 +1,56 @@
+{
+  "testFile": {
+    "id": "syntax_error_vhd",
+    "filename": "syntax_error.vhd",
+    "category": "syntax",
+    "difficulty": "medium"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "missing_semicolon",
+        "description": "Missing semicolon after 'data_out <= temp_data' assignment",
+        "lines": [{ "start": 21, "end": 21 }],
+        "category": "syntax",
+        "severity": "critical",
+        "suggestions": ["Add semicolon: 'data_out <= temp_data;'"],
+        "reasoning": "VHDL requires semicolons to terminate assignment statements. Missing semicolon will cause compilation error.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "race_condition",
+        "description": "Potential race condition: data_out assigned within same clock cycle as temp_data",
+        "lines": [{ "start": 20, "end": 21 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Consider using a pipeline register to delay data_out assignment by one clock cycle",
+          "Assign data_out in the next clock cycle to avoid timing uncertainty"
+        ],
+        "reasoning": "Both temp_data and data_out assignments happen in the same clock cycle, creating potential timing issues.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "asynchronous_reset",
+        "description": "Asynchronous reset may cause timing issues",
+        "lines": [{ "start": 17, "end": 18 }],
+        "category": "style",
+        "severity": "medium",
+        "suggestions": [
+          "Consider using synchronous reset for better design practices",
+          "If asynchronous reset is required, ensure proper timing constraints"
+        ],
+        "reasoning": "Asynchronous resets can cause timing violations and are harder to verify.",
+        "isFalsePositive": false
+      }
+    ],
+    "metadata": {
+      "totalIssues": 3,
+      "criticalIssues": 1,
+      "highIssues": 1,
+      "mediumIssues": 1,
+      "lowIssues": 0,
+      "categories": ["syntax", "logic", "style"]
+    }
+  }
+}

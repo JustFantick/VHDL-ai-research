@@ -1,0 +1,91 @@
+{
+  "testFile": {
+    "id": "style_issues_vhd",
+    "filename": "style_issues.vhd",
+    "category": "style",
+    "difficulty": "medium"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "inconsistent_casing",
+        "description": "Inconsistent case usage throughout the file",
+        "lines": [{ "start": 1, "end": 25 }],
+        "category": "style",
+        "severity": "low",
+        "suggestions": [
+          "Use consistent case: either all lowercase or mixed case with proper capitalization",
+          "Follow IEEE standard: library names lowercase, entity/architecture names mixed case"
+        ],
+        "reasoning": "Inconsistent casing makes code harder to read and maintain.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "missing_spaces",
+        "description": "Missing spaces around operators and keywords",
+        "lines": [
+          { "start": 5, "end": 9 },
+          { "start": 16, "end": 23 }
+        ],
+        "category": "style",
+        "severity": "low",
+        "suggestions": [
+          "Add spaces around operators: 'clk : in std_logic' instead of 'clk:in std_logic'",
+          "Add spaces around keywords: 'if rst = '1' then' instead of 'if rst='1'then'"
+        ],
+        "reasoning": "Proper spacing improves code readability and follows VHDL style guidelines.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "incomplete_sensitivity",
+        "description": "Incomplete sensitivity list in process",
+        "lines": [{ "start": 16, "end": 16 }],
+        "category": "style",
+        "severity": "medium",
+        "suggestions": [
+          "Include all signals used in the process: 'process(clk, rst, data)'",
+          "Or use 'process(all)' for automatic sensitivity list (VHDL-2008)"
+        ],
+        "reasoning": "Incomplete sensitivity list can cause simulation/synthesis mismatches.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "old_clock_style",
+        "description": "Using old-style clock edge detection",
+        "lines": [{ "start": 20, "end": 20 }],
+        "category": "style",
+        "severity": "medium",
+        "suggestions": [
+          "Use 'rising_edge(clk)' instead of 'clk'event and clk='1''",
+          "Import IEEE.numeric_std.all for rising_edge function"
+        ],
+        "reasoning": "rising_edge() is more readable and less error-prone than manual edge detection.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "poor_naming",
+        "description": "Non-descriptive signal and port names",
+        "lines": [
+          { "start": 8, "end": 8 },
+          { "start": 14, "end": 14 }
+        ],
+        "category": "style",
+        "severity": "low",
+        "suggestions": [
+          "Use descriptive names: 'data_output' instead of 'output'",
+          "Use descriptive names: 'temp_data' instead of 'temp'"
+        ],
+        "reasoning": "Descriptive names improve code readability and maintainability.",
+        "isFalsePositive": false
+      }
+    ],
+    "metadata": {
+      "totalIssues": 5,
+      "criticalIssues": 0,
+      "highIssues": 0,
+      "mediumIssues": 2,
+      "lowIssues": 3,
+      "categories": ["style"]
+    }
+  }
+}

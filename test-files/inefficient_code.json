@@ -1,0 +1,72 @@
+{
+  "testFile": {
+    "id": "inefficient_code_vhd",
+    "filename": "inefficient_code.vhd",
+    "category": "efficiency",
+    "difficulty": "medium"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "inefficient_if_chain",
+        "description": "Using multiple if-else statements instead of case statement",
+        "lines": [{ "start": 18, "end": 30 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Replace with case statement for better synthesis",
+          "Use case data_in(3 downto 0) is when \"0000\" => result <= data_in; ... end case;"
+        ],
+        "reasoning": "Case statements are more efficient for synthesis and easier to optimize.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "redundant_operations",
+        "description": "Redundant bit manipulation operations",
+        "lines": [{ "start": 19, "end": 29 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Use shift operations: 'result <= data_in sll 1;' instead of manual bit concatenation",
+          "Use arithmetic shift: 'result <= data_in(14 downto 0) & '0';' can be 'result <= data_in sll 1;'"
+        ],
+        "reasoning": "Shift operations are more efficient and clearer than manual bit manipulation.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "missing_default",
+        "description": "Default case could be optimized",
+        "lines": [{ "start": 28, "end": 29 }],
+        "category": "performance",
+        "severity": "low",
+        "suggestions": [
+          "Consider if default case is necessary",
+          "Use 'others' clause in case statement for better coverage"
+        ],
+        "reasoning": "Explicit default handling can improve synthesis optimization.",
+        "isFalsePositive": false
+      },
+      {
+        "id": "no_clock_enable",
+        "description": "Process runs on every clock cycle without enable",
+        "lines": [{ "start": 14, "end": 32 }],
+        "category": "performance",
+        "severity": "low",
+        "suggestions": [
+          "Add enable signal if processing is not needed every clock cycle",
+          "Consider if continuous processing is required"
+        ],
+        "reasoning": "Unnecessary processing wastes power and resources.",
+        "isFalsePositive": false
+      }
+    ],
+    "metadata": {
+      "totalIssues": 4,
+      "criticalIssues": 0,
+      "highIssues": 0,
+      "mediumIssues": 3,
+      "lowIssues": 1,
+      "categories": ["performance"]
+    }
+  }
+}
