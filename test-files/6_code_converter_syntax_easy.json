@@ -1,0 +1,42 @@
+{
+  "testFile": {
+    "id": "code_converter_syntax_easy",
+    "filename": "6_code_converter_syntax_easy.vhd",
+    "category": "syntax",
+    "difficulty": "easy"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "missing_semicolon",
+        "description": "Missing semicolon after 'y(3) <= ...' assignment",
+        "lines": [{ "start": 13, "end": 13 }],
+        "category": "syntax",
+        "severity": "critical",
+        "suggestions": [
+          "Add semicolon: 'y(3) <= (x(3) and not x(2)) or (x(2) and x(0)) or (x(2) and x(1));'"
+        ],
+        "reasoning": "VHDL requires semicolons to terminate assignment statements. Missing semicolon will cause compilation error."
+      },
+      {
+        "id": "missing_closing_parenthesis",
+        "description": "Missing closing parenthesis in 'y(1) <= ...' assignment expression",
+        "lines": [{ "start": 15, "end": 15 }],
+        "category": "syntax",
+        "severity": "critical",
+        "suggestions": [
+          "Add closing parenthesis: 'y(1) <= x(3) or (not x(2) and x(1)) or (x(2) and not x(1) and x(0));'"
+        ],
+        "reasoning": "The expression has an opening parenthesis but is missing the corresponding closing parenthesis, which will cause a compilation error."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 2,
+      "criticalIssues": 2,
+      "highIssues": 0,
+      "mediumIssues": 0,
+      "lowIssues": 0,
+      "categories": ["syntax"]
+    }
+  }
+}

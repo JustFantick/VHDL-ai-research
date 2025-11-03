@@ -1,0 +1,40 @@
+{
+  "testFile": {
+    "id": "generic_counter_syntax_hard",
+    "filename": "8_generic_counter_syntax_hard.vhd",
+    "category": "syntax",
+    "difficulty": "hard"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "missing_is_keyword",
+        "description": "Missing 'is' keyword after 'entity generic_counter' declaration",
+        "lines": [{ "start": 5, "end": 5 }],
+        "category": "syntax",
+        "severity": "critical",
+        "suggestions": ["Add 'is' keyword: 'entity generic_counter is'"],
+        "reasoning": "VHDL requires the 'is' keyword after entity declarations. Missing 'is' keyword will cause compilation error."
+      },
+      {
+        "id": "missing_end_entity",
+        "description": "Missing 'end generic_counter;' to close entity declaration",
+        "lines": [{ "start": 13, "end": 14 }],
+        "category": "syntax",
+        "severity": "critical",
+        "suggestions": [
+          "Add 'end generic_counter;' after the closing parenthesis of port declaration"
+        ],
+        "reasoning": "Every entity declaration must be closed with 'end entity_name;'. Missing end statement will cause compilation error."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 2,
+      "criticalIssues": 2,
+      "highIssues": 0,
+      "mediumIssues": 0,
+      "lowIssues": 0,
+      "categories": ["syntax"]
+    }
+  }
+}

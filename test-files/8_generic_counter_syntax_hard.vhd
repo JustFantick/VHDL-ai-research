@@ -1,31 +1,29 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
--- FPGA projects using Verilog code VHDL code
--- fpga4student.com: FPGA projects, Verilog projects, VHDL projects
--- VHDL project: VHDL code for counters with testbench  
--- VHDL project: VHDL code for up counter   
-entity UP_COUNTER is
-    Port ( clk: in std_logic; -- clock input
-           reset: in std_logic; -- reset input 
-           counter: out std_logic_vector(3 downto 0) -- output 4-bit counter
-     );
-end UP_COUNTER;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-architecture Behavioral of UP_COUNTER is
-signal counter_up: std_logic_vector(3 downto 0);
-begin
--- up counter
-process(clk)
-begin
-if(rising_edge(clk)) then
-    if(reset='1') then
-         counter_up <= x"0";
-    else
-        counter_up <= counter_up + x"1";
-    end if;
- end if;
-end process;
- counter <= counter_up;
+entity generic_counter
+    generic(
+        WIDTH : integer := 4
+    );
+    port(
+        clk : in std_logic;
+        reset : in std_logic;
+        counter : out std_logic_vector(WIDTH - 1 downto 0)
+    );
 
-end Behavioral;
+architecture behavioral of generic_counter is
+    signal counter_up : unsigned(WIDTH - 1 downto 0);
+begin
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                counter_up <= (others => '0');
+            else
+                counter_up <= counter_up + 1;
+            end if;
+        end if;
+    end process;
+    counter <= std_logic_vector(counter_up);
+end behavioral;

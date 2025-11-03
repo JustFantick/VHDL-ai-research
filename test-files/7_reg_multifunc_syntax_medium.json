@@ -1,0 +1,40 @@
+{
+  "testFile": {
+    "id": "reg_multifunc_syntax_medium",
+    "filename": "7_reg_multifunc_syntax_medium.vhd",
+    "category": "syntax",
+    "difficulty": "medium"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "missing_semicolon_generic",
+        "description": "Missing semicolon after generic declaration",
+        "lines": [{ "start": 7, "end": 7 }],
+        "category": "syntax",
+        "severity": "critical",
+        "suggestions": ["Add semicolon after closing parenthesis: ');'"],
+        "reasoning": "VHDL requires semicolons after generic declarations in entity declarations. Missing semicolon will cause compilation error."
+      },
+      {
+        "id": "missing_end_if",
+        "description": "Missing 'end if' for inner if statement checking 'clken = '1''",
+        "lines": [{ "start": 22, "end": 27 }],
+        "category": "syntax",
+        "severity": "critical",
+        "suggestions": [
+          "Add 'end if;' before the outer 'end if;' to close the inner if statement"
+        ],
+        "reasoning": "Each if statement requires a matching end if. The nested if statement starting at line 22 is missing its closing 'end if', which will cause a compilation error."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 2,
+      "criticalIssues": 2,
+      "highIssues": 0,
+      "mediumIssues": 0,
+      "lowIssues": 0,
+      "categories": ["syntax"]
+    }
+  }
+}
