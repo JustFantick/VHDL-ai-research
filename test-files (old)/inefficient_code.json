@@ -17,8 +17,7 @@
           "Replace with case statement for better synthesis",
           "Use case data_in(3 downto 0) is when \"0000\" => result <= data_in; ... end case;"
         ],
-        "reasoning": "Case statements are more efficient for synthesis and easier to optimize.",
-        "isFalsePositive": false
+        "reasoning": "Case statements are more efficient for synthesis and easier to optimize."
       },
       {
         "id": "redundant_operations",
@@ -30,8 +29,7 @@
           "Use shift operations: 'result <= data_in sll 1;' instead of manual bit concatenation",
           "Use arithmetic shift: 'result <= data_in(14 downto 0) & '0';' can be 'result <= data_in sll 1;'"
         ],
-        "reasoning": "Shift operations are more efficient and clearer than manual bit manipulation.",
-        "isFalsePositive": false
+        "reasoning": "Shift operations are more efficient and clearer than manual bit manipulation."
       },
       {
         "id": "missing_default",
@@ -43,8 +41,7 @@
           "Consider if default case is necessary",
           "Use 'others' clause in case statement for better coverage"
         ],
-        "reasoning": "Explicit default handling can improve synthesis optimization.",
-        "isFalsePositive": false
+        "reasoning": "Explicit default handling can improve synthesis optimization."
       },
       {
         "id": "no_clock_enable",
@@ -56,8 +53,7 @@
           "Add enable signal if processing is not needed every clock cycle",
           "Consider if continuous processing is required"
         ],
-        "reasoning": "Unnecessary processing wastes power and resources.",
-        "isFalsePositive": false
+        "reasoning": "Unnecessary processing wastes power and resources."
       }
     ],
     "metadata": {

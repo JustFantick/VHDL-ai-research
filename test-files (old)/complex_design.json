@@ -17,8 +17,7 @@
           "Add 'data_in' to sensitivity list: 'process(clk, rst, data_in)'",
           "Or use 'process(all)' for automatic sensitivity (VHDL-2008)"
         ],
-        "reasoning": "Process uses data_in but doesn't include it in sensitivity list, causing simulation/synthesis mismatch.",
-        "isFalsePositive": false
+        "reasoning": "Process uses data_in but doesn't include it in sensitivity list, causing simulation/synthesis mismatch."
       },
       {
         "id": "overflow_risk",
@@ -30,8 +29,7 @@
           "Add overflow check before addition",
           "Use larger data type or implement saturation arithmetic"
         ],
-        "reasoning": "Repeated addition can cause overflow, leading to incorrect results.",
-        "isFalsePositive": false
+        "reasoning": "Repeated addition can cause overflow, leading to incorrect results."
       },
       {
         "id": "dead_error_state",
@@ -43,8 +41,7 @@
           "Add conditions to transition to ERROR_STATE",
           "Implement error detection logic for invalid inputs or overflow"
         ],
-        "reasoning": "Unreachable states indicate incomplete error handling logic.",
-        "isFalsePositive": false
+        "reasoning": "Unreachable states indicate incomplete error handling logic."
       },
       {
         "id": "inefficient_loop",
@@ -56,8 +53,7 @@
           "Use built-in bit counting functions",
           "Implement more efficient bit counting algorithm"
         ],
-        "reasoning": "Manual bit counting with addition is less efficient than dedicated functions.",
-        "isFalsePositive": false
+        "reasoning": "Manual bit counting with addition is less efficient than dedicated functions."
       },
       {
         "id": "unused_iterations",
@@ -69,8 +65,7 @@
           "Remove unnecessary loop if only one calculation is needed",
           "Use intermediate results if multiple calculations are required"
         ],
-        "reasoning": "Performing 100 identical operations wastes resources.",
-        "isFalsePositive": false
+        "reasoning": "Performing 100 identical operations wastes resources."
       },
       {
         "id": "output_timing",
@@ -82,8 +77,7 @@
           "Add register to hold data_out value after processing",
           "Implement proper output handshaking"
         ],
-        "reasoning": "Output data should remain valid until new data is available.",
-        "isFalsePositive": false
+        "reasoning": "Output data should remain valid until new data is available."
       },
       {
         "id": "start_signal_timing",
@@ -95,8 +89,7 @@
           "Add start signal synchronization",
           "Implement start signal edge detection"
         ],
-        "reasoning": "Single-cycle start signals can be missed due to timing issues.",
-        "isFalsePositive": false
+        "reasoning": "Single-cycle start signals can be missed due to timing issues."
       }
     ],
     "metadata": {

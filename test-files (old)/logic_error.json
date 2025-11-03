@@ -18,8 +18,7 @@
           "Use modulo arithmetic: 'count <= (count + 1) mod 16;'",
           "Reset counter when it reaches maximum value"
         ],
-        "reasoning": "Counter will wrap around from 15 to 0, which may not be the intended behavior.",
-        "isFalsePositive": false
+        "reasoning": "Counter will wrap around from 15 to 0, which may not be the intended behavior."
       },
       {
         "id": "missing_overflow_signal",
@@ -31,8 +30,7 @@
           "Add overflow output port to signal when counter wraps around",
           "Add carry output to indicate when maximum count is reached"
         ],
-        "reasoning": "External logic may need to know when counter overflows for proper system operation.",
-        "isFalsePositive": false
+        "reasoning": "External logic may need to know when counter overflows for proper system operation."
       },
       {
         "id": "enable_timing",
@@ -44,8 +42,7 @@
           "Synchronize enable signal with clock to avoid metastability",
           "Add enable synchronization register"
         ],
-        "reasoning": "Asynchronous enable signal can cause metastability issues.",
-        "isFalsePositive": false
+        "reasoning": "Asynchronous enable signal can cause metastability issues."
       }
     ],
     "metadata": {

@@ -14,8 +14,7 @@
         "category": "syntax",
         "severity": "critical",
         "suggestions": ["Add semicolon: 'data_out <= temp_data;'"],
-        "reasoning": "VHDL requires semicolons to terminate assignment statements. Missing semicolon will cause compilation error.",
-        "isFalsePositive": false
+        "reasoning": "VHDL requires semicolons to terminate assignment statements. Missing semicolon will cause compilation error."
       },
       {
         "id": "race_condition",
@@ -27,8 +26,7 @@
           "Consider using a pipeline register to delay data_out assignment by one clock cycle",
           "Assign data_out in the next clock cycle to avoid timing uncertainty"
         ],
-        "reasoning": "Both temp_data and data_out assignments happen in the same clock cycle, creating potential timing issues.",
-        "isFalsePositive": false
+        "reasoning": "Both temp_data and data_out assignments happen in the same clock cycle, creating potential timing issues."
       },
       {
         "id": "asynchronous_reset",
@@ -40,8 +38,7 @@
           "Consider using synchronous reset for better design practices",
           "If asynchronous reset is required, ensure proper timing constraints"
         ],
-        "reasoning": "Asynchronous resets can cause timing violations and are harder to verify.",
-        "isFalsePositive": false
+        "reasoning": "Asynchronous resets can cause timing violations and are harder to verify."
       }
     ],
     "metadata": {

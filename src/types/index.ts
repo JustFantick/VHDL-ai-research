@@ -11,7 +11,6 @@ export interface Issue {
   severity: "critical" | "high" | "medium" | "low";
   suggestions: string[];
   reasoning: string;
-  isFalsePositive: boolean;
 }
 
 export interface VHDLTestFile {

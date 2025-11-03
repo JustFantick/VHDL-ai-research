@@ -17,8 +17,7 @@
           "Use consistent case: either all lowercase or mixed case with proper capitalization",
           "Follow IEEE standard: library names lowercase, entity/architecture names mixed case"
         ],
-        "reasoning": "Inconsistent casing makes code harder to read and maintain.",
-        "isFalsePositive": false
+        "reasoning": "Inconsistent casing makes code harder to read and maintain."
       },
       {
         "id": "missing_spaces",
@@ -33,8 +32,7 @@
           "Add spaces around operators: 'clk : in std_logic' instead of 'clk:in std_logic'",
           "Add spaces around keywords: 'if rst = '1' then' instead of 'if rst='1'then'"
         ],
-        "reasoning": "Proper spacing improves code readability and follows VHDL style guidelines.",
-        "isFalsePositive": false
+        "reasoning": "Proper spacing improves code readability and follows VHDL style guidelines."
       },
       {
         "id": "incomplete_sensitivity",
@@ -46,8 +44,7 @@
           "Include all signals used in the process: 'process(clk, rst, data)'",
           "Or use 'process(all)' for automatic sensitivity list (VHDL-2008)"
         ],
-        "reasoning": "Incomplete sensitivity list can cause simulation/synthesis mismatches.",
-        "isFalsePositive": false
+        "reasoning": "Incomplete sensitivity list can cause simulation/synthesis mismatches."
       },
       {
         "id": "old_clock_style",
@@ -59,8 +56,7 @@
           "Use 'rising_edge(clk)' instead of 'clk'event and clk='1''",
           "Import IEEE.numeric_std.all for rising_edge function"
         ],
-        "reasoning": "rising_edge() is more readable and less error-prone than manual edge detection.",
-        "isFalsePositive": false
+        "reasoning": "rising_edge() is more readable and less error-prone than manual edge detection."
       },
       {
         "id": "poor_naming",
@@ -75,8 +71,7 @@
           "Use descriptive names: 'data_output' instead of 'output'",
           "Use descriptive names: 'temp_data' instead of 'temp'"
         ],
-        "reasoning": "Descriptive names improve code readability and maintainability.",
-        "isFalsePositive": false
+        "reasoning": "Descriptive names improve code readability and maintainability."
       }
     ],
     "metadata": {
