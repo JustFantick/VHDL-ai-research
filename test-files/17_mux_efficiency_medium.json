@@ -1,0 +1,32 @@
+{
+  "testFile": {
+    "id": "mux_efficiency_medium",
+    "filename": "17_mux_efficiency_medium.vhd",
+    "category": "efficiency",
+    "difficulty": "medium"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "inefficient_if_elsif_mux",
+        "description": "Using if-elsif chain instead of case statement for multiplexer implementation",
+        "lines": [{ "start": 16, "end": 24 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Replace if-elsif chain with case statement: 'case S0 & S1 is when \"00\" => Z <= A; ... end case;'",
+          "Case statements are more efficient for multiplexers as they create balanced selection logic rather than priority-encoded structure"
+        ],
+        "reasoning": "For multiplexers, case statements are preferred over if-elsif chains because they result in better synthesis optimization. If-elsif chains create a priority-encoded structure that requires more logic levels and is less efficient than the balanced selection logic produced by case statements."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 1,
+      "criticalIssues": 0,
+      "highIssues": 0,
+      "mediumIssues": 1,
+      "lowIssues": 0,
+      "categories": ["performance"]
+    }
+  }
+}

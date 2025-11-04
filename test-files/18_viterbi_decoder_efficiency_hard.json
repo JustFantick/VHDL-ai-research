@@ -1,0 +1,74 @@
+{
+  "testFile": {
+    "id": "viterbi_decoder_efficiency_hard",
+    "filename": "18_viterbi_decoder_efficiency_hard.vhd",
+    "category": "efficiency",
+    "difficulty": "hard"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "inefficient_array_reset",
+        "description": "Using loop to reset array instead of aggregate assignment",
+        "lines": [{ "start": 120, "end": 124 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Replace loop with aggregate assignment: 'TracebackResult := (0,0,0,0,0,0,0,0);'",
+          "Aggregate assignments are more efficient as they can be optimized by synthesis tools and executed in parallel"
+        ],
+        "reasoning": "Loop-based array reset requires sequential iterations and generates more logic. Aggregate assignment is more efficient for synthesis and can be optimized better by the compiler."
+      },
+      {
+        "id": "redundant_conv_int_in_branch_metric_loop",
+        "description": "conv_int(InitialState) called 8 times per clock cycle in loop even though InitialState doesn't change",
+        "lines": [{ "start": 88, "end": 91 }],
+        "category": "performance",
+        "severity": "high",
+        "suggestions": [
+          "Cache conv_int(InitialState) before the loop: 'variable initialStateInt : integer := conv_int(InitialState);'",
+          "Use the cached value in the loop: 'traceback_table(3-initialStateInt)(7-i)(2-InputLevel)'"
+        ],
+        "reasoning": "Function calls with the same argument are redundant. Caching the result eliminates 8 redundant function calls per clock cycle, reducing computation overhead."
+      },
+      {
+        "id": "redundant_conv_int_in_traceback_loop",
+        "description": "Multiple redundant conv_int() calls with same arguments within traceback loop iteration",
+        "lines": [{ "start": 111, "end": 116 }],
+        "category": "performance",
+        "severity": "high",
+        "suggestions": [
+          "Cache conv_int(InitialState) before the loop: 'variable initialStateInt : integer := conv_int(InitialState);'",
+          "Cache conv_int(currentState) at start of each iteration: 'variable currentStateInt : integer := conv_int(currentState);'",
+          "Cache conv_int(temp_output) after assignment: 'variable tempOutputInt : integer := conv_int(temp_output);'",
+          "Use cached values in array indexing operations"
+        ],
+        "reasoning": "In each loop iteration: conv_int(InitialState) is called once (line 112), conv_int(currentState) is called twice (lines 113-114), and conv_int(temp_output) is called twice (lines 113-114). Since InitialState doesn't change during the loop, it can be cached before the loop. The other two can be cached at the start of each iteration to eliminate redundant calls."
+      },
+      {
+        "id": "complex_nested_indexing_repeated_calculations",
+        "description": "Complex nested array indexing with repeated arithmetic calculations that could be cached",
+        "lines": [
+          { "start": 89, "end": 89 },
+          { "start": 112, "end": 114 }
+        ],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Pre-calculate array indices: 'variable tableIndex : integer := 3-conv_int(InitialState); variable rowIndex : integer := 7-i; variable colIndex : integer := 2-InputLevel;'",
+          "Use pre-calculated indices: 'traceback_table(tableIndex)(rowIndex)(colIndex)'",
+          "Cache intermediate indexing results to avoid recalculating nested expressions"
+        ],
+        "reasoning": "Complex nested indexing expressions like '3-conv_int(InitialState)', '7-i', '7-chosenPathIndex', and '2-InputLevel' are recalculated in each iteration. Pre-calculating and caching these values reduces redundant arithmetic operations."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 4,
+      "criticalIssues": 0,
+      "highIssues": 2,
+      "mediumIssues": 2,
+      "lowIssues": 0,
+      "categories": ["performance"]
+    }
+  }
+}
