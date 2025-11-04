@@ -1,64 +1,67 @@
+library ieee;
+use ieee.std_logic_1164.all;
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+entity mealy_fsm is
+    port (
+        clk, rst, upDw : in std_logic;
+        count : out std_logic_vector(3 downto 0)
+    );
+end mealy_fsm;
 
-ENTITY up_down_counter IS
-  PORT (Clk, Rst, UpDw: IN std_logic;
-        count: OUT std_logic_vector (3 DOWNTO 0));
-END up_down_counter;
+architecture behavioral of mealy_fsm is
+    type state_type is (S0, S1, S2, S3);
+    signal curr_state, next_state : state_type;
 
-ARCHITECTURE mealy_beh OF up_down_counter IS
-  TYPE Statetype IS (S0, S1, S2, S3);
-  SIGNAL Currstate, Nextstate: Statetype;
+begin
+    state_reg : process(clk, rst)
+    begin
+        if rst = '1' then
+            curr_state <= S0;
+        elsif rising_edge(clk) then
+            curr_state <= next_state;
+        end if;
+    end process;
 
-BEGIN
+    comb_logic : process(curr_state, upDw)
+    begin
+        next_state <= curr_state;
+        case curr_state is
+            when S0 =>
+                if upDw = '0' then
+                    next_state <= S3;
+                    count <= "0000";
+                else
+                    next_state <= S1;
+                    count <= "0001";
+                end if;
+            when S1 =>
+                if upDw = '0' then
+                    next_state <= S0;
+                    count <= "0000";
+                else
+                    next_state <= S2;
+                    count <= "0010";
+                end if;
+            when S2 =>
+                if upDw = '0' then
+                    next_state <= S1;
+                else
+                    next_state <= S3;
+                    count <= "0011";
+                end if;
+                count <= "0001";
+            when S3 =>
+                if upDw = '0' then
+                    next_state <= S2;
+                    count <= "0010";
+                else
+                    next_state <= S0;
+                    count <= "0000";
+                end if;
+            when others =>
+                next_state <= S0;
+                count <= "0000";
+        end case;
+    end process;
 
-  StateReg: PROCESS (Clk, Rst)
-  BEGIN
-    IF (Rst = '1') THEN
-      Currstate <= S0;
-    ELSIF (Clk = '1' AND Clk'EVENT) THEN
-      Currstate <= Nextstate;
-    END IF;
-  END PROCESS;
-
-  CombLogic: PROCESS (Currstate, UpDw)
-  BEGIN
-    Nextstate <= S0;
-    CASE Currstate IS
-      WHEN S0 => 
-             IF (UpDw = '0') THEN 
-               Nextstate <= S3;
-               count <= "0001";
-             ELSE
-               Nextstate <= S1;
-               count <= "0100";
-             END IF;
-      WHEN S1 =>
-             IF (UpDw = '0') THEN 
-               Nextstate <= S0;
-               count <= "1000";
-             ELSE
-               Nextstate <= S2;
-               count <= "0010";
-             END IF;
-      WHEN S2 =>
-             IF (UpDw = '0') THEN 
-               Nextstate <= S1;
-               count <= "0100";
-             ELSE
-               Nextstate <= S3;
-               count <= "0001";
-             END IF;
-      WHEN S3 =>
-             IF (UpDw = '0') THEN 
-               Nextstate <= S2;
-               count <= "0010";
-             ELSE
-               Nextstate <= S0;
-               count <= "1000";
-             END IF;
-      END CASE;
-  END PROCESS;
-
-END mealy_beh;
+end behavioral;

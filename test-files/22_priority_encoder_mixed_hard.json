@@ -1,0 +1,60 @@
+{
+  "testFile": {
+    "id": "priority_encoder_mixed_hard",
+    "filename": "22_priority_encoder_mixed_hard.vhd",
+    "category": "mixed",
+    "difficulty": "hard"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "redundant_priority_checks",
+        "description": "Redundant priority checks in when-else chain - checking that higher priority bits are '0' is unnecessary since when-else evaluates sequentially",
+        "lines": [{ "start": 16, "end": 21 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Remove redundant priority checks: 'a_in(6) = '1' and a_in(7) = '0'' should be just 'a_in(6) = '1''",
+          "Remove checks like 'a_in(7 downto 6) = \"00\"', 'a_in(7 downto 5) = \"000\"', etc. - the when-else chain already ensures priority by evaluating top to bottom",
+          "Simplify to: 'y_op <= \"110\" when en = '1' and a_in(6) = '1' else ...'"
+        ],
+        "reasoning": "The when-else statement evaluates conditions sequentially from top to bottom and stops at the first true condition. Therefore, if a_in(7)='1', the condition on line 15 will be true and subsequent conditions won't be evaluated. Checking that higher priority bits are '0' (e.g., 'a_in(7) = '0'', 'a_in(7 downto 6) = \"00\"') is redundant and creates unnecessary logic that synthesis tools must optimize away."
+      },
+      {
+        "id": "unused_signal",
+        "description": "Signal temp_result is declared and assigned but never used",
+        "lines": [{ "start": 13, "end": 13 }, { "start": 24, "end": 32 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Remove the unused signal declaration: 'signal temp_result : std_logic_vector(2 downto 0);'",
+          "Remove the assignment to temp_result (lines 24-32) since it's never read",
+          "Unused signals waste resources and create unnecessary logic"
+        ],
+        "reasoning": "The signal temp_result is declared on line 13 and assigned a value on lines 24-32, but it is never read or used anywhere in the design. This creates unnecessary logic that synthesis tools may optimize away, but it's better to remove it to keep the code clean and avoid potential issues."
+      },
+      {
+        "id": "duplicate_logic",
+        "description": "Duplicate priority encoder logic - same logic implemented twice for y_op and temp_result",
+        "lines": [{ "start": 15, "end": 23 }, { "start": 24, "end": 32 }],
+        "category": "performance",
+        "severity": "high",
+        "suggestions": [
+          "Remove duplicate logic - either remove temp_result assignment or use it: 'y_op <= temp_result;'",
+          "The identical priority encoder logic is duplicated, creating twice the hardware resources needed",
+          "If temp_result is needed for pipelining or other purposes, document why; otherwise remove it"
+        ],
+        "reasoning": "The exact same priority encoder logic is implemented twice: once for y_op (lines 15-23) and once for temp_result (lines 24-32). This duplicates the hardware implementation, wasting resources. Since temp_result is never used, the entire assignment should be removed. If temp_result was intended for some purpose (like pipelining), it should be used (e.g., 'y_op <= temp_result;'), otherwise the duplicate logic should be eliminated."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 3,
+      "criticalIssues": 0,
+      "highIssues": 1,
+      "mediumIssues": 2,
+      "lowIssues": 0,
+      "categories": ["performance"]
+    }
+  }
+}
+

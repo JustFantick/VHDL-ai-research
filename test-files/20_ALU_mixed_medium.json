@@ -1,0 +1,58 @@
+{
+  "testFile": {
+    "id": "ALU_mixed_medium",
+    "filename": "20_ALU_mixed_medium.vhd",
+    "category": "mixed",
+    "difficulty": "medium"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "inconsistent_port_formatting",
+        "description": "Inconsistent port declaration formatting - closing parenthesis on same line instead of separate line",
+        "lines": [{ "start": 11, "end": 11 }],
+        "category": "style",
+        "severity": "low",
+        "suggestions": [
+          "Move closing parenthesis to separate line: 'F : out unsigned(15 downto 0)' on line 11, then ');' on next line",
+          "Follow consistent formatting style for port declarations throughout the entity"
+        ],
+        "reasoning": "The port declaration has the opening parenthesis on a separate line (line 6) but the closing parenthesis on the same line as the last port (line 11). This inconsistent formatting reduces code readability and violates style guidelines."
+      },
+      {
+        "id": "swapped_cin_logic_subr",
+        "description": "SUBR operation has swapped carry-in logic - when cin='1' it subtracts 1, when cin='0' it doesn't, which is backwards",
+        "lines": [{ "start": 34, "end": 39 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Fix SUBR operation: when cin='1' should be 'F_i <= ('0' & S) - ('0' & R);' without subtracting 1",
+          "When cin='0' should be 'F_i <= ('0' & S) - ('0' & R) - 1;' to subtract 1",
+          "The carry-in logic is reversed for the subtract operation"
+        ],
+        "reasoning": "For subtraction with borrow (carry-in), when cin='1' (no borrow), the subtraction should proceed normally. When cin='0' (borrow), an additional 1 should be subtracted. The current implementation has this logic reversed, causing incorrect results for the SUBR operation."
+      },
+      {
+        "id": "redundant_zero_addition",
+        "description": "Redundant addition of + 0 in ADD operation when cin='0'",
+        "lines": [{ "start": 32, "end": 32 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Remove redundant '+ 0': 'F_i <= ('0' & R) + ('0' & S);'",
+          "Adding zero is unnecessary and creates extra logic that synthesis tools must optimize away"
+        ],
+        "reasoning": "Adding 0 to a value is a no-op operation. The expression 'F_i <= ('0' & R) + ('0' & S) + 0;' should be simplified to 'F_i <= ('0' & R) + ('0' & S);' to avoid unnecessary addition logic."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 3,
+      "criticalIssues": 0,
+      "highIssues": 1,
+      "mediumIssues": 1,
+      "lowIssues": 1,
+      "categories": ["style", "logic", "performance"]
+    }
+  }
+}
+

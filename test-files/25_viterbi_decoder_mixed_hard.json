@@ -1,0 +1,74 @@
+{
+  "testFile": {
+    "id": "viterbi_decoder_mixed_hard",
+    "filename": "25_viterbi_decoder_mixed_hard.vhd",
+    "category": "mixed",
+    "difficulty": "hard"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "inconsistent_keyword_casing",
+        "description": "Inconsistent keyword casing - conv_int function uses uppercase keywords (FUNCTION, CASE, WHEN, RETURN, etc.) while hamming_distance function uses lowercase keywords",
+        "lines": [{ "start": 60, "end": 69 }],
+        "category": "style",
+        "severity": "medium",
+        "suggestions": [
+          "Use lowercase keywords consistently: 'function conv_int(a : std_logic_vector(1 downto 0)) return integer is'",
+          "Follow modern VHDL style conventions with lowercase keywords throughout the file",
+          "Replace FUNCTION, CASE, WHEN, RETURN, OTHERS, END with lowercase equivalents"
+        ],
+        "reasoning": "The conv_int function uses old-style VHDL uppercase keywords (FUNCTION, CASE, WHEN, RETURN, OTHERS, END) while the hamming_distance function in the same file uses modern lowercase keywords. This creates inconsistency within the same file and reduces readability. Modern VHDL style conventions prefer lowercase keywords throughout."
+      },
+      {
+        "id": "duplicate_assignment_wrong_state",
+        "description": "Duplicate assignment to output_vector_var(i) - first assignment uses correct current_state, then immediately overwrites with updated current_state from next_state_table",
+        "lines": [{ "start": 119, "end": 121 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Remove the duplicate assignment on line 121",
+          "The first assignment on line 119 correctly uses current_state before it is updated",
+          "The second assignment on line 121 incorrectly uses current_state after it has been updated by next_state_table, overwriting the correct value"
+        ],
+        "reasoning": "On line 119, output_vector_var(i) is correctly assigned using current_state. Then on line 120, current_state is updated using next_state_table. However, on line 121, output_vector_var(i) is assigned again using the updated current_state, which overwrites the correct value from line 119. This creates incorrect output vector values because each iteration should use the state before it transitions, not after."
+      },
+      {
+        "id": "redundant_type_conversions",
+        "description": "Redundant type conversions - conv_int(current_state) and conv_int(temp_output) called multiple times in same loop iteration",
+        "lines": [{ "start": 119, "end": 120 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Cache conversion results: 'variable current_state_int : integer; variable temp_output_int : integer;'",
+          "Compute once: 'current_state_int := 3 - conv_int(current_state); temp_output_int := 3 - conv_int(temp_output);'",
+          "Reuse cached values: 'output_vector_var(i) := output_table(current_state_int)(temp_output_int); current_state := next_state_table(current_state_int)(temp_output_int);'",
+          "This eliminates redundant function calls and improves synthesis efficiency"
+        ],
+        "reasoning": "In the traceback loop (lines 117-123), conv_int(current_state) is called twice on line 119 and twice on line 120 (total 4 times per iteration), and conv_int(temp_output) is also called twice per iteration (lines 119 and 120). These conversions are computed multiple times with the same input values, creating redundant logic. Caching the conversion results in variables would eliminate this redundancy."
+      },
+      {
+        "id": "addr_idx_wrong_timing",
+        "description": "addr_idx recalculated after traceback loop but before initial_state update - uses old state value instead of new state",
+        "lines": [{ "start": 125, "end": 127 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Move addr_idx calculation after initial_state update: 'initial_state <= current_state; addr_idx := 3 - conv_int(initial_state);'",
+          "Or remove the calculation entirely if it's recalculated at the start of next clock cycle anyway",
+          "The calculation on line 125 uses current_state which is correct, but it's computed before initial_state is updated, making it redundant if recalculated at cycle start"
+        ],
+        "reasoning": "On line 125, addr_idx is recalculated using current_state. However, initial_state is not updated until line 127. Since addr_idx is recalculated at the start of the next clock cycle (line 93) using initial_state, the calculation on line 125 is effectively wasted. More importantly, if the intention was to prepare addr_idx for the next iteration, it should be calculated after initial_state is updated, not before. The current order means addr_idx on line 125 uses the old state value, which is then immediately overwritten by the calculation on line 93 using the updated initial_state."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 4,
+      "criticalIssues": 0,
+      "highIssues": 2,
+      "mediumIssues": 2,
+      "lowIssues": 0,
+      "categories": ["style", "logic", "performance"]
+    }
+  }
+}
+

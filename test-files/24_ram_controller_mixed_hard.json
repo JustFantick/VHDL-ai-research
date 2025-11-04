@@ -1,0 +1,73 @@
+{
+  "testFile": {
+    "id": "ram_controller_mixed_hard",
+    "filename": "24_ram_controller_mixed_hard.vhd",
+    "category": "mixed",
+    "difficulty": "hard"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "inconsistent_keyword_casing",
+        "description": "Inconsistent keyword casing - using uppercase TYPE, IS, ARRAY, TO, OF, STD_LOGIC_VECTOR, DOWNTO while rest of code uses lowercase keywords",
+        "lines": [{ "start": 16, "end": 16 }],
+        "category": "style",
+        "severity": "medium",
+        "suggestions": [
+          "Use lowercase keywords consistently: 'type ram_array_t is array (0 to 127) of std_logic_vector(7 downto 0);'",
+          "Follow modern VHDL style conventions with lowercase keywords throughout the file"
+        ],
+        "reasoning": "Old-style VHDL used uppercase keywords, but modern VHDL style conventions prefer lowercase. Mixing styles within the same file creates inconsistency and reduces readability."
+      },
+      {
+        "id": "redundant_type_conversions",
+        "description": "Redundant type conversion - to_integer(unsigned(addr)) computed three times in the same clock cycle",
+        "lines": [{ "start": 30, "end": 34 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Cache the conversion result: 'variable addr_int : integer range 0 to 127; addr_int := to_integer(unsigned(addr));'",
+          "Use the cached value: 'addr_reg <= addr_int; ram(addr_int) <= data_in; if wr_en = '1' and addr_int = addr_reg then'",
+          "This eliminates redundant logic and improves synthesis efficiency"
+        ],
+        "reasoning": "The expression to_integer(unsigned(addr)) is computed three times in the same clock cycle: on line 30 for addr_reg assignment, on line 32 for RAM write address, and on line 34 for the write-read conflict check. Each computation creates redundant logic. Storing the result in a variable and reusing it would be more efficient."
+      },
+      {
+        "id": "incorrect_write_read_conflict",
+        "description": "Incorrect write-read conflict handling - compares current cycle's addr with previous cycle's addr_reg, causing logic error",
+        "lines": [{ "start": 34, "end": 38 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Compare current address with current address: 'if wr_en = '1' and to_integer(unsigned(addr)) = to_integer(unsigned(addr)) then' is incorrect logic",
+          "For write-through behavior, use: 'if wr_en = '1' then data_out <= data_in; else data_out <= ram(addr_reg); end if;'",
+          "For read-old-data behavior, use: 'data_out <= ram(addr_reg);' and handle write separately",
+          "The comparison addr = addr_reg compares values from different clock cycles, making the condition always false when writing and reading same address"
+        ],
+        "reasoning": "The code attempts to handle write-read conflicts by comparing the current cycle's address (to_integer(unsigned(addr))) with the previous cycle's registered address (addr_reg). However, addr_reg is updated on line 30 in the same clock cycle, but the comparison on line 34 uses the old value of addr_reg from the previous cycle. This means when writing and reading the same address in the same cycle, the condition will never be true as intended, leading to incorrect data output behavior."
+      },
+      {
+        "id": "write_read_timing_issue",
+        "description": "Write-read conflict logic uses stale addr_reg value - addr_reg is updated in same cycle but comparison uses previous value",
+        "lines": [{ "start": 30, "end": 38 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Use consistent timing: compare current addr with current addr, or use registered addr for both read and write operations",
+          "If implementing write-through: 'data_out <= data_in when wr_en = '1' else ram(addr_reg);'",
+          "Remove the flawed comparison logic that mixes current and previous cycle values"
+        ],
+        "reasoning": "The write-read conflict detection on line 34 compares to_integer(unsigned(addr)) (current cycle) with addr_reg (which was set in previous cycle, though updated on line 30 in current cycle, the comparison uses the old value). This creates a timing mismatch where the comparison will never correctly detect when the same address is being written and read simultaneously. The logic needs to be restructured to use consistent timing references."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 4,
+      "criticalIssues": 0,
+      "highIssues": 2,
+      "mediumIssues": 2,
+      "lowIssues": 0,
+      "categories": ["style", "performance", "logic"]
+    }
+  }
+}
+

@@ -1,0 +1,59 @@
+{
+  "testFile": {
+    "id": "bin-to-bcd_converter_mixed_hard",
+    "filename": "23_bin-to-bcd_converter_mixed_hard.vhd",
+    "category": "mixed",
+    "difficulty": "hard"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "duplicate_assignment",
+        "description": "Duplicate assignment to bcds_reg(3 downto 0) - same slice assigned twice with identical logic",
+        "lines": [{ "start": 76, "end": 79 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Remove the duplicate assignment on lines 78-79",
+          "Multiple drivers for the same signal slice cause undefined behavior and synthesis errors"
+        ],
+        "reasoning": "The signal slice bcds_reg(3 downto 0) is assigned twice with identical logic: once on lines 76-77 and again on lines 78-79. In VHDL, having multiple assignments to the same signal creates a driver conflict, leading to undefined behavior and synthesis errors. Only one assignment should remain."
+      },
+      {
+        "id": "redundant_type_conversions",
+        "description": "Redundant type conversions - each BCD digit slice converted to unsigned multiple times in same expression",
+        "lines": [{ "start": 69, "end": 79 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Cache the unsigned conversion: 'variable temp : unsigned(3 downto 0) := unsigned(bcds(19 downto 16)); bcds_reg(19 downto 16) <= std_logic_vector(temp + 3) when temp > 4 else bcds(19 downto 16);'",
+          "Or use a helper function to avoid repeated conversions",
+          "Each slice is converted to unsigned twice: once for comparison and once for addition, creating redundant logic"
+        ],
+        "reasoning": "In each assignment for bcds_reg slices, the same std_logic_vector slice is converted to unsigned multiple times: once in the condition ('unsigned(bcds(19 downto 16)) > 4') and once in the result ('unsigned(bcds(19 downto 16)) + 3'). These redundant conversions create unnecessary logic. Caching the conversion result would eliminate the redundancy."
+      },
+      {
+        "id": "redundant_default_assignments",
+        "description": "Redundant default assignments at start of combinational process that get overwritten in every case branch",
+        "lines": [{ "start": 43, "end": 47 }],
+        "category": "performance",
+        "severity": "medium",
+        "suggestions": [
+          "Remove default assignments that are always overwritten: state_next, bcds_next, binary_next, shift_counter_next, bcds_out_reg_next",
+          "Only assign values in the case branches where they actually change",
+          "Default assignments that are immediately overwritten create unnecessary logic"
+        ],
+        "reasoning": "At the start of the combinational process, default values are assigned to all next-state signals (lines 43-47). However, every case branch (start, shift, done) assigns new values to these signals, making the default assignments redundant. This creates unnecessary logic that synthesis tools must optimize away. The assignments should only occur in the case branches where values actually change."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 3,
+      "criticalIssues": 0,
+      "highIssues": 1,
+      "mediumIssues": 2,
+      "lowIssues": 0,
+      "categories": ["logic", "performance"]
+    }
+  }
+}
+

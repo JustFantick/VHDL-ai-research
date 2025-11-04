@@ -1,147 +1,138 @@
--------------------------------------- 
--- Viterbi Decoder
---------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_signed.all;
-use ieee.numeric_std;
+use ieee.numeric_std.all;
 
-entity ViterbiDecoder is
-    port (input: in std_logic_vector (1 downto 0);
-          clk: in std_logic;
-          output: out bit); --the ouput will be delayed for 3 clock, because Traceback Depth is 3
-end ViterbiDecoder;
+entity viterbi_decoder is
+  port(
+    clk    : in  std_logic;
+    input  : in  std_logic_vector(1 downto 0);
+    output : out bit
+  );
+end entity viterbi_decoder;
 
-architecture ViterbiDecoder_behav of ViterbiDecoder is
-type word_2 is array (1 downto 0) of std_logic_vector (1 downto 0);
-type word_4_NextState is array (3 downto 0) of std_logic_vector (1 downto 0);
-type word_3 is array (2 downto 0) of std_logic_vector (1 downto 0); 
-type word_3_bit is array (2 downto 0) of bit; 
-type word_4 is array (3 downto 0) of integer;
-type word_4_bit is array (3 downto 0) of bit;
-type memory_4 is array (3 downto 0) of word_2;
-type memory_4_bit is array (3 downto 0) of word_4_bit;
-type memory_4_NextState is array (3 downto 0) of word_4_NextState;
-type memory_8 is array (7 downto 0) of integer;
-type memory_traceback_row is array (7 downto 0) of word_3;
-type memory_traceback_table is array (3 downto 0) of memory_traceback_row;
+architecture rtl of viterbi_decoder is
+  type word_2_t is array(1 downto 0) of std_logic_vector(1 downto 0);
+  type word_4_next_state_t is array(3 downto 0) of std_logic_vector(1 downto 0);
+  type word_3_t is array(2 downto 0) of std_logic_vector(1 downto 0);
+  type word_3_bit_t is array(2 downto 0) of bit;
+  type word_4_t is array(3 downto 0) of integer;
+  type word_4_bit_t is array(3 downto 0) of bit;
+  type memory_4_bit_t is array(3 downto 0) of word_4_bit_t;
+  type memory_4_next_state_t is array(3 downto 0) of word_4_next_state_t;
+  type memory_8_t is array(7 downto 0) of integer;
+  type memory_traceback_row_t is array(7 downto 0) of word_3_t;
+  type memory_traceback_table_t is array(3 downto 0) of memory_traceback_row_t;
 
---To ease up the implementation i considered the traceback depth is 3 and hardcoded all the possible paths,
---which are 32 path in this case of traceback depth 3.
---The following are the definition of 4 tables each contain 8 possible paths depending on the initial state
-constant traceback_table: memory_traceback_table:=((("00","00","00"),("11","10","11"),("00","11","10"),("11","01","01"),("00","00","11"),("11","10","00"),("00","11","01"),("11","01","10")),
-                                                          (("11","00","00"),("00","10","11"),("11","11","10"),("00","01","01"),("11","00","11"),("00","10","00"),("11","11","01"),("00","01","10")),
-                                                          (("10","11","00"),("01","01","11"),("10","00","10"),("01","10","01"),("10","11","11"),("01","01","00"),("10","00","01"),("01","10","10")),
-                                                          (("01","11","00"),("10","01","11"),("01","00","10"),("10","10","01"),("01","11","11"),("10","01","00"),("01","00","01"),("10","10","10")));
+  constant traceback_table : memory_traceback_table_t := (
+    (("00", "00", "00"), ("11", "10", "11"), ("00", "11", "10"), ("11", "01", "01"), ("00", "00", "11"), ("11", "10", "00"), ("00", "11", "01"), ("11", "01", "10")),
+    (("11", "00", "00"), ("00", "10", "11"), ("11", "11", "10"), ("00", "01", "01"), ("11", "00", "11"), ("00", "10", "00"), ("11", "11", "01"), ("00", "01", "10")),
+    (("10", "11", "00"), ("01", "01", "11"), ("10", "00", "10"), ("01", "10", "01"), ("10", "11", "11"), ("01", "01", "00"), ("10", "00", "01"), ("01", "10", "10")),
+    (("01", "11", "00"), ("10", "01", "11"), ("01", "00", "10"), ("10", "10", "01"), ("01", "11", "11"), ("10", "01", "00"), ("01", "00", "01"), ("10", "10", "10"))
+  );
 
---The next table maps the state transitions to the inputs that caused them(Current State Vs. output)
--- -1 means invalid operation
---constant outputTable:memory_4_bit:=((0,-1,-1,1),(1,-1,-1,0),(-1,1,0,-1),(-1,0,1,-1));
-constant outputTable:memory_4_bit:=(('0','0','0','1'),('1','0','0','0'),('0','1','0','0'),('0','0','1','0'));
+  constant output_table : memory_4_bit_t := (
+    ('0', '0', '0', '1'),
+    ('1', '0', '0', '0'),
+    ('0', '1', '0', '0'),
+    ('0', '0', '1', '0')
+  );
 
---The next table gets the next state providing the current state and the state transition
-constant nextStateTable:memory_4_NextState:=(("00","00","00","10"),("10","00","00","00"),("00","11","01","00"),("00","01","11","00"));
+  constant next_state_table : memory_4_next_state_t := (
+    ("00", "00", "00", "10"),
+    ("10", "00", "00", "00"),
+    ("00", "11", "01", "00"),
+    ("00", "01", "11", "00")
+  );
 
+  constant traceback_depth : positive := 3;
 
-constant TraceBackDepth: positive:=3;
+  function hamming_distance(a : std_logic_vector(1 downto 0)) return integer is
+  begin
+    case a is
+      when "00" => return 0;
+      when "01" => return 1;
+      when "10" => return 1;
+      when "11" => return 2;
+      when others => return -1;
+    end case;
+  end function hamming_distance;
 
+  FUNCTION conv_int(a : std_logic_vector(1 downto 0)) RETURN integer IS
+  BEGIN
+    CASE a IS
+      WHEN "00" => RETURN 0;
+      WHEN "01" => RETURN 1;
+      WHEN "10" => RETURN 2;
+      WHEN "11" => RETURN 3;
+      WHEN OTHERS => RETURN -1;
+    END CASE;
+  END FUNCTION conv_int;
 
-function hammingDistance(a:std_logic_vector (1 downto 0)) return integer is
+  signal initial_state : std_logic_vector(1 downto 0) := "00";
+  signal traceback_result : memory_8_t := (others => 0);
+  signal input_level : integer range 0 to 3 := 0;
+  signal output_vector : word_3_bit_t;
+
 begin
-  
-  case a is
-                  when "00" =>
-                      return 0;
-                  when "01" =>
-                      return 1;
-                  when "10" =>
-                      return 1;
-                  when "11" =>
-                      return 2;
-                  when others => 
-                     return -1; --invalid operation
- end case; 
-end hammingDistance; 
+  process(clk)
+    variable traceback_result_var : memory_8_t;
+    variable chosen_path_index : integer range 0 to 7;
+    variable lowest_path_metric_error : integer;
+    variable current_state : std_logic_vector(1 downto 0);
+    variable temp_output : std_logic_vector(1 downto 0);
+    variable output_vector_var : word_3_bit_t;
+    variable i : integer;
+    variable addr_idx : integer;
+  begin
+    if rising_edge(clk) then
+      if input /= "UU" then
+        traceback_result_var := traceback_result;
+        output_vector_var := output_vector;
+        i := 0;
 
-function conv_int(a:std_logic_vector (1 downto 0)) return integer is
-begin
-  
-  case a is
-                  when "00" =>
-                      return 0;
-                  when "01" =>
-                      return 1;
-                  when "10" =>
-                      return 2;
-                  when "11" =>
-                      return 3;
-                  when others => 
-                     return -1; --invalid operation
- end case; 
-end conv_int; 
+        addr_idx := 3 - conv_int(initial_state);
 
+        while i < 8 loop
+          traceback_result_var(i) := traceback_result_var(i) + hamming_distance(traceback_table(addr_idx)(7 - i)(2 - input_level) xor input);
+          i := i + 1;
+        end loop;
 
-begin  
+        output <= output_vector_var(input_level);
 
-  process(clk) 
-   variable InitialState:std_logic_vector (1 downto 0):="00";
-   variable TracebackResult:memory_8:=(0,0,0,0,0,0,0,0);
-   variable InputLevel:integer:=0;
-   variable i:integer:=0;
-   variable chosenPathIndex:integer;
-   variable lowestPathMetricError:integer:=6; --Initialized to the maximum possible error
-   variable currentState:std_logic_vector (1 downto 0);
-   variable outputVector:word_3_bit;
-   
-   variable temp_output:std_logic_vector (1 downto 0);
-   begin
-            if (Clk'event) and (Clk='1') and (input/= "UU")  then -- Positive Edge
-               i:=0;
-               
-               -- Branch Metric Calculations
-               while i <8 loop
-                         TracebackResult(i):=TracebackResult(i)+ hammingDistance(traceback_table(3-conv_int(InitialState))(7-i)(2-InputLevel) xor input );
-                          i:=i+1;
-               end loop;    
-                         
-               
-               --Output the decoded data, from the previous path metric calculations
-               --Output will be delayed for 3 clock cycles
-               output<=outputVector(InputLevel);
-               
-               InputLevel:=InputLevel+1;
-               if(InputLevel =TraceBackDepth)then                   
-                   --Select the correct path which have the lowest path metric error
-                    i:=0;
-                    while i<8 loop
-                        if(lowestPathMetricError>TracebackResult(i)) then
-                          lowestPathMetricError:=TracebackResult(i);
-                          chosenPathIndex:=i;
-                        end if;
-                          i:=i+1;
-                    end loop;  
-                   
-                   --Convert the selected path to corresponding output
-                   currentState:=InitialState;
-                    i:=0;
-                    while i<TraceBackDepth loop
-                     temp_output:=traceback_table(3-conv_int(InitialState))(7-chosenPathIndex)(2-i);
-                     outputVector(i):=outputTable(3-conv_int(currentState))(3-conv_int(temp_output));
-                     currentState:=nextStateTable(3-conv_int(currentState))(3-conv_int(temp_output));
-                     i:=i+1;
-                    end loop;  
-                   
-                   --Set the initial state of the next stage
-                   InitialState:=currentState;
-                   
-                   --Reset variables
-                   InputLevel:=0;
-                   TracebackResult:=(0,0,0,0,0,0,0,0);
-                   lowestPathMetricError:=6;
-                   
-               end if;
-               
+        if input_level = traceback_depth then
+          i := 0;
+          lowest_path_metric_error := 6;
+
+          while i < 8 loop
+            if lowest_path_metric_error > traceback_result_var(i) then
+              lowest_path_metric_error := traceback_result_var(i);
+              chosen_path_index := i;
             end if;
-   end process;   
-   
-end ViterbiDecoder_behav;
+            i := i + 1;
+          end loop;
+
+          current_state := initial_state;
+          i := 0;
+
+          while i < traceback_depth loop
+            temp_output := traceback_table(addr_idx)(7 - chosen_path_index)(2 - i);
+            output_vector_var(i) := output_table(3 - conv_int(current_state))(3 - conv_int(temp_output));
+            current_state := next_state_table(3 - conv_int(current_state))(3 - conv_int(temp_output));
+            output_vector_var(i) := output_table(3 - conv_int(current_state))(3 - conv_int(temp_output));
+            i := i + 1;
+          end loop;
+
+          addr_idx := 3 - conv_int(current_state);
+
+          initial_state <= current_state;
+          input_level <= 0;
+          traceback_result <= (others => 0);
+          output_vector <= output_vector_var;
+        else
+          traceback_result <= traceback_result_var;
+          input_level <= input_level + 1;
+        end if;
+      end if;
+    end if;
+  end process;
+end architecture rtl;
