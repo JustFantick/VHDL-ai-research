@@ -1,0 +1,20 @@
+{
+  "testFile": {
+    "id": "5_testbench_moore_golden_vhd",
+    "filename": "5_testbench_moore_golden.vhd",
+    "category": "golden",
+    "difficulty": "N/A"
+  },
+  "groundTruth": {
+    "issues": [],
+    "metadata": {
+      "totalIssues": 0,
+      "criticalIssues": 0,
+      "highIssues": 0,
+      "mediumIssues": 0,
+      "lowIssues": 0,
+      "categories": []
+    }
+  }
+}
+
