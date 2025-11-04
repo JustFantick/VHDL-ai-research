@@ -1,0 +1,32 @@
+{
+  "testFile": {
+    "id": "12_counter_logic_easy_vhd",
+    "filename": "12_counter_logic_easy.vhd",
+    "category": "logic",
+    "difficulty": "easy"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "counter_decrements_instead_of_increments",
+        "description": "Counter decrements instead of increments: uses subtraction operator instead of addition",
+        "lines": [{ "start": 25, "end": 25 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Change 'counter_up <= counter_up - 1;' to 'counter_up <= counter_up + 1;'",
+          "The counter should increment on each clock cycle when reset is not active"
+        ],
+        "reasoning": "A counter typically increments its value. Using subtraction causes the counter to count down instead of up, which is the opposite of the intended behavior."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 1,
+      "criticalIssues": 0,
+      "highIssues": 1,
+      "mediumIssues": 0,
+      "lowIssues": 0,
+      "categories": ["logic"]
+    }
+  }
+}

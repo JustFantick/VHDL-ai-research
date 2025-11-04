@@ -1,0 +1,45 @@
+{
+  "testFile": {
+    "id": "13_reg_multifunc_logic_medium_vhd",
+    "filename": "13_reg_multifunc_logic_medium.vhd",
+    "category": "logic",
+    "difficulty": "medium"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "shift_inserts_zero_instead_of_input",
+        "description": "Shift operation inserts '0' instead of SI input signal, ignoring the serial input",
+        "lines": [{ "start": 23, "end": 23 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Change 'shreg <= shreg(DEPTH - 2 downto 0) & '0';' to 'shreg <= shreg(DEPTH - 2 downto 0) & SI;'",
+          "The shift register should shift in the SI input signal, not a constant zero"
+        ],
+        "reasoning": "A shift register should shift in the data from the SI (Serial Input) port. Using a constant '0' means the input signal is completely ignored, and the register will always shift in zeros regardless of the SI input value."
+      },
+      {
+        "id": "output_reads_from_wrong_position",
+        "description": "Output SO reads from bit position 0 (LSB) instead of DEPTH - 1 (MSB), outputting newest data instead of oldest",
+        "lines": [{ "start": 27, "end": 27 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Change 'SO <= shreg(0);' to 'SO <= shreg(DEPTH - 1);'",
+          "For a right-shift register, the oldest data (first shifted in) is at the MSB position and should be output from there"
+        ],
+        "reasoning": "In a right-shift register, new data enters at the LSB (position 0) and shifts right. The oldest data, which should be output via SO, is located at the MSB (position DEPTH - 1). Reading from position 0 outputs the newest data instead of the oldest."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 2,
+      "criticalIssues": 0,
+      "highIssues": 2,
+      "mediumIssues": 0,
+      "lowIssues": 0,
+      "categories": ["logic"]
+    }
+  }
+}
+
