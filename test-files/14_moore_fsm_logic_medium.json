@@ -1,0 +1,44 @@
+{
+  "testFile": {
+    "id": "moore_fsm_logic_medium",
+    "filename": "14_moore_fsm_logic_medium.vhd",
+    "category": "logic",
+    "difficulty": "medium"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "mutually_exclusive_condition_S0_S1",
+        "description": "Condition '(S0 and S1)' can never be true because S0 and S1 are mutually exclusive state signals in a Moore FSM",
+        "lines": [{ "start": 41, "end": 41 }],
+        "category": "logic",
+        "severity": "medium",
+        "suggestions": [
+          "Remove the redundant condition '(S0 and S1)' from the expression",
+          "In a Moore FSM, only one state signal can be active at a time, making this condition always false"
+        ],
+        "reasoning": "In a Moore finite state machine, state signals S0, S1, S2, and S3 are mutually exclusive - only one can be '1' at any given time. The condition '(S0 and S1)' requires both to be true simultaneously, which is impossible, making this part of the expression always evaluate to false."
+      },
+      {
+        "id": "mutually_exclusive_condition_S2_S3",
+        "description": "Condition '(S2 and S3)' can never be true because S2 and S3 are mutually exclusive state signals in a Moore FSM",
+        "lines": [{ "start": 42, "end": 42 }],
+        "category": "logic",
+        "severity": "medium",
+        "suggestions": [
+          "Remove the redundant condition '(S2 and S3)' from the expression",
+          "In a Moore FSM, only one state signal can be active at a time, making this condition always false"
+        ],
+        "reasoning": "In a Moore finite state machine, state signals S0, S1, S2, and S3 are mutually exclusive - only one can be '1' at any given time. The condition '(S2 and S3)' requires both to be true simultaneously, which is impossible, making this part of the expression always evaluate to false."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 2,
+      "criticalIssues": 0,
+      "highIssues": 0,
+      "mediumIssues": 2,
+      "lowIssues": 0,
+      "categories": ["logic"]
+    }
+  }
+}

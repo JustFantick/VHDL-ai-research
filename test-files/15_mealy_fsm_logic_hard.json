@@ -1,0 +1,57 @@
+{
+  "testFile": {
+    "id": "mealy_fsm_logic_hard",
+    "filename": "15_mealy_fsm_logic_hard.vhd",
+    "category": "logic",
+    "difficulty": "hard"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "race_condition_feedback",
+        "description": "Race condition: D depends on Q, creating a feedback loop where D is assigned from Q while Q is assigned from D on clock edge",
+        "lines": [{ "start": 41, "end": 42 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Remove Q from the sensitivity list and from D assignments",
+          "D should only depend on state signals (a0-a3) and inputs (x1-x4), not on Q directly",
+          "The feedback loop D -> Q -> D creates timing uncertainty and race conditions"
+        ],
+        "reasoning": "The next state signal D depends on the current state Q, while Q is assigned from D on the clock edge. This creates a combinational feedback loop that can cause race conditions and timing uncertainty, as D's value depends on Q which was itself derived from the previous D value."
+      },
+      {
+        "id": "duplicate_assignment_y1",
+        "description": "y1 assigned twice with different logic: first assignment overwritten by second assignment with incorrect logic",
+        "lines": [{ "start": 48, "end": 48 }, { "start": 51, "end": 51 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Remove one of the duplicate assignments",
+          "Keep only the correct assignment: 'y1 <= not((a1 and x1) or (a3 and x4));'"
+        ],
+        "reasoning": "Signal y1 is assigned twice in the same process (lines 48 and 51). The second assignment overwrites the first, causing y1 to output incorrect values based on the wrong logic expression."
+      },
+      {
+        "id": "duplicate_assignment_y3",
+        "description": "y3 assigned twice with different logic: first assignment overwritten by second assignment with incorrect logic",
+        "lines": [{ "start": 50, "end": 50 }, { "start": 52, "end": 52 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Remove one of the duplicate assignments",
+          "Keep only the correct assignment: 'y3 <= not(a3 and x4);'"
+        ],
+        "reasoning": "Signal y3 is assigned twice in the same process (lines 50 and 52). The second assignment overwrites the first, causing y3 to output incorrect values based on the wrong logic expression."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 3,
+      "criticalIssues": 0,
+      "highIssues": 3,
+      "mediumIssues": 0,
+      "lowIssues": 0,
+      "categories": ["logic"]
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "testFile": {
+    "id": "comparator_logic_easy",
+    "filename": "11_comparator_logic_easy.vhd",
+    "category": "logic",
+    "difficulty": "easy"
+  },
+  "groundTruth": {
+    "issues": [
+      {
+        "id": "duplicate_wrong_assignment",
+        "description": "A_equal_B assigned twice with wrong logic: second assignment uses A_greater_B logic instead of equality check",
+        "lines": [
+          { "start": 18, "end": 18 },
+          { "start": 28, "end": 28 }
+        ],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Remove duplicate assignment on line 28",
+          "Assign A_greater_B correctly: 'A_greater_B <= tmp6 or tmp7 or tmp8;'"
+        ],
+        "reasoning": "A_equal_B is assigned twice - first with correct equality logic (line 18), then overwritten with A_greater_B logic (line 28). This causes A_equal_B to output incorrect values, and A_greater_B is never assigned."
+      },
+      {
+        "id": "missing_assignment",
+        "description": "A_greater_B output port is never assigned a value",
+        "lines": [{ "start": 25, "end": 28 }],
+        "category": "logic",
+        "severity": "high",
+        "suggestions": [
+          "Add assignment: 'A_greater_B <= tmp6 or tmp7 or tmp8;'",
+          "The logic for A_greater_B is computed but never assigned to the output port"
+        ],
+        "reasoning": "The intermediate signals tmp6, tmp7, and tmp8 compute the A_greater_B logic correctly, but the result is never assigned to the A_greater_B output port, leaving it unassigned."
+      }
+    ],
+    "metadata": {
+      "totalIssues": 2,
+      "criticalIssues": 0,
+      "highIssues": 2,
+      "mediumIssues": 0,
+      "lowIssues": 0,
+      "categories": ["logic"]
+    }
+  }
+}
