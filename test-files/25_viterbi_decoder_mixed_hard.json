@@ -37,7 +37,7 @@
         "id": "redundant_type_conversions",
         "description": "Redundant type conversions - conv_int(current_state) and conv_int(temp_output) called multiple times in same loop iteration",
         "lines": [{ "start": 119, "end": 120 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Cache conversion results: 'variable current_state_int : integer; variable temp_output_int : integer;'",
@@ -48,27 +48,26 @@
         "reasoning": "In the traceback loop (lines 117-123), conv_int(current_state) is called twice on line 119 and twice on line 120 (total 4 times per iteration), and conv_int(temp_output) is also called twice per iteration (lines 119 and 120). These conversions are computed multiple times with the same input values, creating redundant logic. Caching the conversion results in variables would eliminate this redundancy."
       },
       {
-        "id": "addr_idx_wrong_timing",
-        "description": "addr_idx recalculated after traceback loop but before initial_state update - uses old state value instead of new state",
-        "lines": [{ "start": 125, "end": 127 }],
-        "category": "logic",
-        "severity": "high",
+        "id": "redundant_addr_idx_calculation",
+        "description": "Redundant addr_idx calculation - computed after traceback loop but immediately recalculated at start of next clock cycle",
+        "lines": [{ "start": 125, "end": 125 }],
+        "category": "efficiency",
+        "severity": "medium",
         "suggestions": [
-          "Move addr_idx calculation after initial_state update: 'initial_state <= current_state; addr_idx := 3 - conv_int(initial_state);'",
-          "Or remove the calculation entirely if it's recalculated at the start of next clock cycle anyway",
-          "The calculation on line 125 uses current_state which is correct, but it's computed before initial_state is updated, making it redundant if recalculated at cycle start"
+          "Remove the redundant calculation on line 125",
+          "addr_idx is recalculated at the start of each clock cycle (line 93) using initial_state, making the calculation on line 125 unnecessary",
+          "The calculation on line 125 is computed but never used since addr_idx is recalculated from scratch on line 93 of the next cycle"
         ],
-        "reasoning": "On line 125, addr_idx is recalculated using current_state. However, initial_state is not updated until line 127. Since addr_idx is recalculated at the start of the next clock cycle (line 93) using initial_state, the calculation on line 125 is effectively wasted. More importantly, if the intention was to prepare addr_idx for the next iteration, it should be calculated after initial_state is updated, not before. The current order means addr_idx on line 125 uses the old state value, which is then immediately overwritten by the calculation on line 93 using the updated initial_state."
+        "reasoning": "On line 125, addr_idx is recalculated using current_state. However, addr_idx is a variable that is recalculated from scratch at the start of each clock cycle (line 93) using initial_state. Since variable values don't persist across clock cycles, the calculation on line 125 is redundant and wasted computation. The value calculated on line 125 is never used because addr_idx is immediately recalculated on line 93 of the next clock cycle."
       }
     ],
     "metadata": {
       "totalIssues": 4,
       "criticalIssues": 0,
-      "highIssues": 2,
-      "mediumIssues": 2,
+      "highIssues": 1,
+      "mediumIssues": 3,
       "lowIssues": 0,
-      "categories": ["style", "logic", "performance"]
+      "categories": ["style", "logic", "efficiency"]
     }
   }
 }
-

@@ -8,25 +8,37 @@
   "groundTruth": {
     "issues": [
       {
-        "id": "inefficient_if_elsif_mux",
-        "description": "Using if-elsif chain instead of case statement for multiplexer implementation",
-        "lines": [{ "start": 16, "end": 24 }],
-        "category": "performance",
+        "id": "redundant_else_clause",
+        "description": "Redundant else clause: the final 'else Z <= D;' is unnecessary since the previous elsif already covers all cases (S0='1' and S1='1')",
+        "lines": [{ "start": 22, "end": 24 }],
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
-          "Replace if-elsif chain with case statement: 'case S0 & S1 is when \"00\" => Z <= A; ... end case;'",
-          "Case statements are more efficient for multiplexers as they create balanced selection logic rather than priority-encoded structure"
+          "Remove the redundant else clause",
+          "The elsif condition 'S0 = '1' and S1 = '1'' already covers all remaining cases, making the else clause unnecessary"
         ],
-        "reasoning": "For multiplexers, case statements are preferred over if-elsif chains because they result in better synthesis optimization. If-elsif chains create a priority-encoded structure that requires more logic levels and is less efficient than the balanced selection logic produced by case statements."
+        "reasoning": "For a 2-bit select signal (S0, S1), there are exactly 4 possible combinations: 00, 01, 10, 11. All four cases are explicitly handled by the if-elsif chain, making the else clause redundant. This adds unnecessary logic that will never execute."
+      },
+      {
+        "id": "unnecessary_process_for_combinational",
+        "description": "Using a process for pure combinational logic when a concurrent assignment would be more efficient",
+        "lines": [{ "start": 14, "end": 25 }],
+        "category": "efficiency",
+        "severity": "medium",
+        "suggestions": [
+          "Replace process with concurrent assignment: 'Z <= A when (S0='0' and S1='0') else B when (S0='1' and S1='0') else C when (S0='0' and S1='1') else D;'",
+          "Concurrent assignments are more efficient for simple combinational logic as they don't require process overhead"
+        ],
+        "reasoning": "For simple combinational multiplexer logic with no sequential elements, a concurrent assignment statement is more efficient than a process. Processes introduce overhead and are typically used for sequential logic or when multiple statements are needed. A concurrent assignment eliminates the process overhead and is more direct for this use case."
       }
     ],
     "metadata": {
-      "totalIssues": 1,
+      "totalIssues": 2,
       "criticalIssues": 0,
       "highIssues": 0,
-      "mediumIssues": 1,
+      "mediumIssues": 2,
       "lowIssues": 0,
-      "categories": ["performance"]
+      "categories": ["efficiency"]
     }
   }
 }

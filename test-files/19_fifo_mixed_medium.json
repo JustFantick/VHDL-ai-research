@@ -35,7 +35,7 @@
         "id": "inefficient_loop_for_simple_assignment",
         "description": "Using inefficient for loop with conditional check to perform simple array assignment",
         "lines": [{ "start": 31, "end": 35 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Replace loop with direct assignment: 'elem_array(counter) <= elem_in;'",
@@ -44,17 +44,16 @@
         "reasoning": "A for loop is used to iterate from 0 to counter, checking if i equals counter, then assigning. This is inefficient as it creates unnecessary loop logic when a direct indexed assignment 'elem_array(counter) <= elem_in;' would be sufficient and more efficient."
       },
       {
-        "id": "if_else_behavior_change",
-        "description": "Changing from two separate if statements to if-else changes logic behavior for prev_rd signal",
+        "id": "if_else_prev_rd_logic_error",
+        "description": "Incorrect if-else logic for prev_rd: when rd='1' and counter=0, prev_rd is incorrectly set to false instead of being left unchanged",
         "lines": [{ "start": 39, "end": 44 }],
         "category": "logic",
         "severity": "high",
         "suggestions": [
-          "Restore original structure with two separate if statements",
-          "Original logic: 'if rd = '1' and counter /= 0 then prev_rd := true; end if; if rd = '0' then prev_rd := false; end if;'",
-          "The if-else structure causes prev_rd to be set to false when rd='1' but counter=0, which differs from original behavior"
+          "Use two separate if statements: 'if rd = '1' and counter /= 0 then prev_rd := true; end if; if rd = '0' then prev_rd := false; end if;'",
+          "The if-else structure incorrectly resets prev_rd to false when rd='1' but counter=0, which should leave prev_rd unchanged"
         ],
-        "reasoning": "The original code had two separate if statements: one setting prev_rd to true when rd='1' and counter/=0, and another setting it to false when rd='0'. The refactored if-else structure changes behavior: when rd='1' but counter=0, prev_rd is now set to false (via else branch), whereas the original would leave prev_rd unchanged. This subtle logic change can cause incorrect FIFO operation."
+        "reasoning": "The if-else structure causes prev_rd to be set to false whenever the condition 'rd='1' and counter/=0' is false, including when rd='1' but counter=0. This is incorrect because prev_rd should only be set to false when rd='0', and should remain unchanged when rd='1' but counter=0. Using two separate if statements fixes this logic error."
       }
     ],
     "metadata": {
@@ -67,4 +66,3 @@
     }
   }
 }
-

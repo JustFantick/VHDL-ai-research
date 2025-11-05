@@ -29,26 +29,13 @@
           "Add spaces around colons: 'y : out' instead of 'y:out'"
         ],
         "reasoning": "VHDL style guidelines recommend spaces around colons in port declarations for better readability."
-      },
-      {
-        "id": "complex_logic_expression",
-        "description": "Complex, hard-to-read logic expression should be refactored into intermediate signals",
-        "lines": [{ "start": 13, "end": 14 }],
-        "category": "style",
-        "severity": "medium",
-        "suggestions": [
-          "Break complex expression into intermediate signals for better readability",
-          "Use separate signals for each condition: condition1, condition2, condition3",
-          "Refactor to improve maintainability and clarity"
-        ],
-        "reasoning": "Complex nested logic expressions with multiple conditions are difficult to read, maintain, and debug. Breaking them into intermediate signals improves code clarity and maintainability."
       }
     ],
     "metadata": {
-      "totalIssues": 3,
+      "totalIssues": 2,
       "criticalIssues": 0,
       "highIssues": 0,
-      "mediumIssues": 3,
+      "mediumIssues": 2,
       "lowIssues": 0,
       "categories": ["style"]
     }

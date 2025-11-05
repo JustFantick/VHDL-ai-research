@@ -11,7 +11,7 @@
         "id": "redundant_default_assignment",
         "description": "Redundant default assignment of next_state before case statement that gets overwritten in every branch",
         "lines": [{ "start": 27, "end": 27 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Remove the default assignment 'next_state <= curr_state;' before the case statement",
@@ -31,28 +31,15 @@
           "The unconditional assignment on line 52 always overwrites the conditional 'count <= \"0011\"' assignment when upDw='1', causing incorrect output"
         ],
         "reasoning": "In the S2 state, when upDw='1', count is correctly assigned to \"0011\" on line 50, but then immediately overwritten to \"0001\" by the unconditional assignment on line 52. This breaks the up-count sequence. Additionally, when upDw='0', count is not assigned in the if branch, relying on the unconditional assignment which may not match the intended counter behavior."
-      },
-      {
-        "id": "combinational_output_timing",
-        "description": "Output count is assigned in combinational process, causing potential glitches when input changes asynchronously",
-        "lines": [{ "start": 25, "end": 65 }],
-        "category": "logic",
-        "severity": "medium",
-        "suggestions": [
-          "Register the output count to synchronize it with the clock edge",
-          "Add output register: 'process(clk) begin if rising_edge(clk) then count_reg <= count_next; end if; end process; count <= count_reg;'",
-          "Or use a registered output style to avoid timing violations and glitches"
-        ],
-        "reasoning": "In a Mealy FSM, outputs are typically combinational and depend on both state and inputs. However, assigning outputs directly in combinational logic means they can change immediately when the input upDw changes, potentially before the clock edge. This can cause glitches, timing violations, and incorrect values to be sampled by downstream logic. Registering the output would synchronize it with the clock."
       }
     ],
     "metadata": {
-      "totalIssues": 3,
+      "totalIssues": 2,
       "criticalIssues": 0,
       "highIssues": 1,
-      "mediumIssues": 2,
+      "mediumIssues": 1,
       "lowIssues": 0,
-      "categories": ["performance", "logic"]
+      "categories": ["efficiency", "logic"]
     }
   }
 }

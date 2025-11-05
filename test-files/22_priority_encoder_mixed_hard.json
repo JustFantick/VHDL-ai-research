@@ -11,7 +11,7 @@
         "id": "redundant_priority_checks",
         "description": "Redundant priority checks in when-else chain - checking that higher priority bits are '0' is unnecessary since when-else evaluates sequentially",
         "lines": [{ "start": 16, "end": 21 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Remove redundant priority checks: 'a_in(6) = '1' and a_in(7) = '0'' should be just 'a_in(6) = '1''",
@@ -23,8 +23,11 @@
       {
         "id": "unused_signal",
         "description": "Signal temp_result is declared and assigned but never used",
-        "lines": [{ "start": 13, "end": 13 }, { "start": 24, "end": 32 }],
-        "category": "performance",
+        "lines": [
+          { "start": 13, "end": 13 },
+          { "start": 24, "end": 32 }
+        ],
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Remove the unused signal declaration: 'signal temp_result : std_logic_vector(2 downto 0);'",
@@ -36,8 +39,11 @@
       {
         "id": "duplicate_logic",
         "description": "Duplicate priority encoder logic - same logic implemented twice for y_op and temp_result",
-        "lines": [{ "start": 15, "end": 23 }, { "start": 24, "end": 32 }],
-        "category": "performance",
+        "lines": [
+          { "start": 15, "end": 23 },
+          { "start": 24, "end": 32 }
+        ],
+        "category": "efficiency",
         "severity": "high",
         "suggestions": [
           "Remove duplicate logic - either remove temp_result assignment or use it: 'y_op <= temp_result;'",
@@ -53,8 +59,7 @@
       "highIssues": 1,
       "mediumIssues": 2,
       "lowIssues": 0,
-      "categories": ["performance"]
+      "categories": ["efficiency"]
     }
   }
 }
-

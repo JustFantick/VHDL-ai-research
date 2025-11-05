@@ -6,47 +6,14 @@
     "difficulty": "hard"
   },
   "groundTruth": {
-    "issues": [
-      {
-        "id": "race_condition_clock_edge_alignment",
-        "description": "Race condition: sequence_in changes with wait times that align with clock edges, causing setup/hold violations",
-        "lines": [
-          { "start": 47, "end": 47 },
-          { "start": 49, "end": 49 },
-          { "start": 51, "end": 51 }
-        ],
-        "category": "logic",
-        "severity": "high",
-        "suggestions": [
-          "Change wait times from 5 ns to values that don't align with clock edges (e.g., 1 ns, 3 ns, or 7 ns)",
-          "Use wait times that are offset from clock_period/2 to avoid changing signals exactly at clock edges",
-          "Ensure setup/hold time requirements are met by changing signals well before or after clock edges"
-        ],
-        "reasoning": "With clock_period = 10 ns, the clock edges occur every 5 ns (half period). Using wait for 5 ns causes sequence_in to change exactly at clock edges, creating race conditions where the signal may be sampled at an unstable transition point. This violates setup/hold time requirements and can lead to metastability or unpredictable behavior in the FSM."
-      },
-      {
-        "id": "insufficient_timing_margins",
-        "description": "Multiple signal changes with minimal wait times (5 ns) create insufficient timing margins, risking metastability",
-        "lines": [
-          { "start": 45, "end": 51 }
-        ],
-        "category": "logic",
-        "severity": "high",
-        "suggestions": [
-          "Increase wait times to provide adequate setup/hold margins (e.g., wait for 1 ns or 9 ns instead of 5 ns)",
-          "Ensure signals change at least 1-2 ns away from clock edges to meet timing requirements",
-          "Use wait statements that provide clear timing separation between signal changes and clock edges"
-        ],
-        "reasoning": "The testbench uses wait for 5 ns multiple times, which exactly matches half the clock period. This creates timing violations where signals change at the same instant as clock edges, potentially causing the FSM to sample unstable or transitioning signals. Proper testbenches should change stimulus signals with sufficient margins before or after clock edges to ensure reliable operation."
-      }
-    ],
+    "issues": [],
     "metadata": {
-      "totalIssues": 2,
+      "totalIssues": 0,
       "criticalIssues": 0,
-      "highIssues": 2,
+      "highIssues": 0,
       "mediumIssues": 0,
       "lowIssues": 0,
-      "categories": ["logic"]
+      "categories": []
     }
   }
 }

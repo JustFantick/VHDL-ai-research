@@ -23,7 +23,7 @@
         "id": "redundant_type_conversions",
         "description": "Redundant type conversions - each BCD digit slice converted to unsigned multiple times in same expression",
         "lines": [{ "start": 69, "end": 79 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Cache the unsigned conversion: 'variable temp : unsigned(3 downto 0) := unsigned(bcds(19 downto 16)); bcds_reg(19 downto 16) <= std_logic_vector(temp + 3) when temp > 4 else bcds(19 downto 16);'",
@@ -36,7 +36,7 @@
         "id": "redundant_default_assignments",
         "description": "Redundant default assignments at start of combinational process that get overwritten in every case branch",
         "lines": [{ "start": 43, "end": 47 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Remove default assignments that are always overwritten: state_next, bcds_next, binary_next, shift_counter_next, bcds_out_reg_next",
@@ -52,7 +52,7 @@
       "highIssues": 1,
       "mediumIssues": 2,
       "lowIssues": 0,
-      "categories": ["logic", "performance"]
+      "categories": ["logic", "efficiency"]
     }
   }
 }

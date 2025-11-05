@@ -23,7 +23,7 @@
         "id": "redundant_type_conversions",
         "description": "Redundant type conversion - to_integer(unsigned(addr)) computed three times in the same clock cycle",
         "lines": [{ "start": 30, "end": 34 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Cache the conversion result: 'variable addr_int : integer range 0 to 127; addr_int := to_integer(unsigned(addr));'",
@@ -33,41 +33,26 @@
         "reasoning": "The expression to_integer(unsigned(addr)) is computed three times in the same clock cycle: on line 30 for addr_reg assignment, on line 32 for RAM write address, and on line 34 for the write-read conflict check. Each computation creates redundant logic. Storing the result in a variable and reusing it would be more efficient."
       },
       {
-        "id": "incorrect_write_read_conflict",
-        "description": "Incorrect write-read conflict handling - compares current cycle's addr with previous cycle's addr_reg, causing logic error",
-        "lines": [{ "start": 34, "end": 38 }],
-        "category": "logic",
-        "severity": "high",
-        "suggestions": [
-          "Compare current address with current address: 'if wr_en = '1' and to_integer(unsigned(addr)) = to_integer(unsigned(addr)) then' is incorrect logic",
-          "For write-through behavior, use: 'if wr_en = '1' then data_out <= data_in; else data_out <= ram(addr_reg); end if;'",
-          "For read-old-data behavior, use: 'data_out <= ram(addr_reg);' and handle write separately",
-          "The comparison addr = addr_reg compares values from different clock cycles, making the condition always false when writing and reading same address"
-        ],
-        "reasoning": "The code attempts to handle write-read conflicts by comparing the current cycle's address (to_integer(unsigned(addr))) with the previous cycle's registered address (addr_reg). However, addr_reg is updated on line 30 in the same clock cycle, but the comparison on line 34 uses the old value of addr_reg from the previous cycle. This means when writing and reading the same address in the same cycle, the condition will never be true as intended, leading to incorrect data output behavior."
-      },
-      {
-        "id": "write_read_timing_issue",
-        "description": "Write-read conflict logic uses stale addr_reg value - addr_reg is updated in same cycle but comparison uses previous value",
+        "id": "incorrect_write_read_conflict_timing",
+        "description": "Incorrect write-read conflict handling - compares current cycle's addr with previous cycle's addr_reg due to signal assignment timing",
         "lines": [{ "start": 30, "end": 38 }],
         "category": "logic",
         "severity": "high",
         "suggestions": [
-          "Use consistent timing: compare current addr with current addr, or use registered addr for both read and write operations",
-          "If implementing write-through: 'data_out <= data_in when wr_en = '1' else ram(addr_reg);'",
+          "For write-through behavior, use: 'if wr_en = '1' then data_out <= data_in; else data_out <= ram(addr_reg); end if;'",
+          "The comparison 'to_integer(unsigned(addr)) = addr_reg' compares current cycle address with previous cycle registered address, so it will never correctly detect simultaneous write-read to same address",
           "Remove the flawed comparison logic that mixes current and previous cycle values"
         ],
-        "reasoning": "The write-read conflict detection on line 34 compares to_integer(unsigned(addr)) (current cycle) with addr_reg (which was set in previous cycle, though updated on line 30 in current cycle, the comparison uses the old value). This creates a timing mismatch where the comparison will never correctly detect when the same address is being written and read simultaneously. The logic needs to be restructured to use consistent timing references."
+        "reasoning": "The code attempts to handle write-read conflicts by comparing to_integer(unsigned(addr)) (current cycle) with addr_reg. However, addr_reg is assigned on line 30 but signal assignments take effect on the next clock edge, so the comparison on line 34 uses the old value of addr_reg from the previous cycle. This means when writing and reading the same address in the same cycle, the condition will never be true as intended, leading to incorrect data output behavior."
       }
     ],
     "metadata": {
-      "totalIssues": 4,
+      "totalIssues": 3,
       "criticalIssues": 0,
-      "highIssues": 2,
+      "highIssues": 1,
       "mediumIssues": 2,
       "lowIssues": 0,
-      "categories": ["style", "performance", "logic"]
+      "categories": ["style", "efficiency", "logic"]
     }
   }
 }
-

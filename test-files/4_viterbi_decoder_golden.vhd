@@ -5,7 +5,7 @@ entity ViterbiDecoder is
     port (
         input : in std_logic_vector(1 downto 0);
         clk : in std_logic;
-        output : out std_logic;
+        output : out std_logic
     );
 end ViterbiDecoder;
 

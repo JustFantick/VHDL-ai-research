@@ -36,7 +36,7 @@
         "id": "redundant_zero_addition",
         "description": "Redundant addition of + 0 in ADD operation when cin='0'",
         "lines": [{ "start": 32, "end": 32 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Remove redundant '+ 0': 'F_i <= ('0' & R) + ('0' & S);'",
@@ -51,8 +51,7 @@
       "highIssues": 1,
       "mediumIssues": 1,
       "lowIssues": 1,
-      "categories": ["style", "logic", "performance"]
+      "categories": ["style", "logic", "efficiency"]
     }
   }
 }
-

@@ -6,7 +6,7 @@ entity VHDL_MOORE_FSM_Sequence_Detector is
         clock : in std_logic;
         reset : in std_logic;
         sequence_in : in std_logic;
-        detector_out : out std_logic;
+        detector_out : out std_logic
     );
 end VHDL_MOORE_FSM_Sequence_Detector;
 

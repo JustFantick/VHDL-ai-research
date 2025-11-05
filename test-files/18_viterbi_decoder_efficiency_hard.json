@@ -11,7 +11,7 @@
         "id": "inefficient_array_reset",
         "description": "Using loop to reset array instead of aggregate assignment",
         "lines": [{ "start": 120, "end": 124 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Replace loop with aggregate assignment: 'TracebackResult := (0,0,0,0,0,0,0,0);'",
@@ -23,7 +23,7 @@
         "id": "redundant_conv_int_in_branch_metric_loop",
         "description": "conv_int(InitialState) called 8 times per clock cycle in loop even though InitialState doesn't change",
         "lines": [{ "start": 88, "end": 91 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "high",
         "suggestions": [
           "Cache conv_int(InitialState) before the loop: 'variable initialStateInt : integer := conv_int(InitialState);'",
@@ -35,7 +35,7 @@
         "id": "redundant_conv_int_in_traceback_loop",
         "description": "Multiple redundant conv_int() calls with same arguments within traceback loop iteration",
         "lines": [{ "start": 111, "end": 116 }],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "high",
         "suggestions": [
           "Cache conv_int(InitialState) before the loop: 'variable initialStateInt : integer := conv_int(InitialState);'",
@@ -52,7 +52,7 @@
           { "start": 89, "end": 89 },
           { "start": 112, "end": 114 }
         ],
-        "category": "performance",
+        "category": "efficiency",
         "severity": "medium",
         "suggestions": [
           "Pre-calculate array indices: 'variable tableIndex : integer := 3-conv_int(InitialState); variable rowIndex : integer := 7-i; variable colIndex : integer := 2-InputLevel;'",
@@ -68,7 +68,7 @@
       "highIssues": 2,
       "mediumIssues": 2,
       "lowIssues": 0,
-      "categories": ["performance"]
+      "categories": ["efficiency"]
     }
   }
 }

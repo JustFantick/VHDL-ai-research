@@ -19,6 +19,8 @@ begin
             Z <= B;
         elsif S0 = '0' and S1 = '1' then
             Z <= C;
+        elsif S0 = '1' and S1 = '1' then
+            Z <= D;
         else
             Z <= D;
         end if;
