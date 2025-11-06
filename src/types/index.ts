@@ -50,7 +50,8 @@ export interface ModelConfig {
   provider: "openai" | "anthropic" | "google";
   modelId: string;
   maxTokens: number;
-  temperature: number;
+  temperature?: number;
+  seed?: number;
 }
 
 export interface TestConfig {

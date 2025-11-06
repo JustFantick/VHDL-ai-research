@@ -8,20 +8,20 @@ export const MODEL_CONFIGS: ModelConfig[] = [
     provider: "openai",
     modelId: "gpt-5-nano",
     maxTokens: MAX_TOKENS,
-    temperature: 0.1,
+    seed: 42,
   },
   {
     name: "Claude Sonnet 4.5",
     provider: "anthropic",
     modelId: "claude-sonnet-4-5",
     maxTokens: MAX_TOKENS,
-    temperature: 0.1,
+    temperature: 0.0,
   },
   {
     name: "Gemini 2.5 Flash Lite",
     provider: "google",
     modelId: "gemini-2.5-flash-lite",
     maxTokens: MAX_TOKENS,
-    temperature: 0.1,
+    temperature: 0.0,
   },
 ];

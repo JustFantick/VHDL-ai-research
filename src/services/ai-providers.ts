@@ -190,7 +190,7 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
       messages: [{ role: "user", content: prompt }],
       //max_tokens: config.maxTokens, // OpenAI does not support max_tokens
       //temperature: config.temperature, // GPT-5 family models does not support temperature
-      //seed: 42,
+      seed: config.seed,
     });
 
     const content = response.choices[0]?.message?.content;
@@ -233,7 +233,13 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
     }
 
     const model = this.google.getGenerativeModel({ model: config.modelId });
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: config.temperature,
+        maxOutputTokens: config.maxTokens,
+      },
+    });
     const response = await result.response;
     const content = response.text();
 
