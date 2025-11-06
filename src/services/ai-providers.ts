@@ -49,7 +49,9 @@ export class AIProviderService {
   }
 
   private createVHDLAnalysisPrompt(vhdlCode: string): string {
-    return `Analyze the following VHDL code for errors and issues. Report ONLY clear, unambiguous issues that can be objectively verified. Provide your analysis in JSON format with the following EXACT structure:
+    return `Analyze the following VHDL code for errors and issues. ACCURACY IS MORE IMPORTANT THAN COMPREHENSIVENESS. Report ONLY clear, unambiguous issues that can be objectively verified. If you are uncertain about an issue, DO NOT report it.
+
+Provide your analysis in JSON format with the following EXACT structure:
 
 {
   "issuesFound": [
@@ -68,28 +70,102 @@ export class AIProviderService {
 CATEGORY DEFINITIONS (use exactly these):
 - "syntax": Compilation errors that prevent code from compiling (missing semicolons, parentheses, undeclared identifiers, type mismatches)
 - "logic": Functional errors that cause incorrect behavior (wrong assignments, missing assignments, incorrect logic expressions, race conditions, unreachable states)
-- "style": Code style violations following VHDL conventions (inconsistent capitalization, old-style constructs like 'event instead of rising_edge, missing spaces, naming conventions)
+- "style": Code style violations following VHDL conventions. MUST check for: (1) Inconsistent capitalization (library names like "IEEE" vs "ieee", signal names like "CLK" vs "clk", package names like "STD_LOGIC_1164" vs "std_logic_1164"), (2) Missing whitespaces (no spaces around assignment operators like "<=", no spaces in sensitivity lists like "process(x0,x1)" vs "process(x0, x1)"), (3) Old-style constructs (CLK'event instead of rising_edge/falling_edge), (4) Naming convention violations
 - "efficiency": Suboptimal implementations that waste resources (redundant logic, unnecessary processes for combinational logic, inefficient algorithms)
 
-SEVERITY GUIDELINES:
-- "critical": Code will not compile or will cause simulation errors (syntax errors, missing declarations)
-- "high": Code compiles but has functional errors that will cause incorrect behavior (wrong logic, missing assignments, unassigned outputs)
-- "medium": Code works but has style issues or moderate efficiency problems (old-style constructs, redundant operations, style violations)
-- "low": Minor style issues or very minor efficiency improvements (spacing, minor naming inconsistencies)
+SEVERITY GUIDELINES (use these exact mappings):
+- "critical": Code will NOT compile or will cause immediate simulation errors. Examples: missing semicolons, undeclared identifiers, syntax errors that prevent parsing
+- "high": Code compiles but has functional errors causing incorrect behavior. Examples: wrong logic expressions, missing assignments to output ports, duplicate assignments to same signal, unassigned outputs
+- "medium": Code works correctly but has style violations or moderate efficiency issues. Examples: old-style constructs (CLK'event), redundant operations, style violations (missing spaces around operators, missing spaces in lists, inconsistent capitalization of library/package/signal names)
+- "low": Minor style issues with minimal impact. Examples: spacing inconsistencies, minor naming variations
 
-IMPORTANT RULES:
-1. Report ONLY unambiguous issues - if you're unsure, do not report it
-2. Each issue must be objectively verifiable (compiler would catch it, or can be verified through code analysis)
-3. Do NOT report subjective preferences or optional optimizations unless they are clear issues
-4. Use exact category names: "syntax", "logic", "style", "efficiency" (NOT "performance")
-5. Line numbers must be accurate (1-indexed, where line 1 is the first line of code)
-6. If no issues are found, return empty array: "issuesFound": []
-7. Focus on issues that exist, not suggestions for "better" code unless it's a clear problem
+IMPORTANT: Multiple assignments to the same signal = "high" (not critical, code may compile but behave incorrectly). Unassigned output ports = "high" (not critical, code compiles but output is undefined).
+
+LINE NUMBER ACCURACY REQUIREMENTS:
+1. Line numbers are 1-indexed (first line of VHDL code is line 1)
+2. Count ALL lines including blank lines in the code block
+3. For multi-line issues, use the exact start and end line numbers
+4. For single-line issues, start and end should be the same number
+5. Before reporting, verify line numbers by counting from the first line of the VHDL code block
+6. Double-check line numbers match the actual code structure
+
+ISSUE DETECTION CHECKLIST (verify these systematically):
+1. Output ports: Check every "out" port has at least one assignment statement
+2. Signal assignments: Check for duplicate assignments to the same signal in the same scope
+3. Syntax: Check for missing semicolons, parentheses, proper statement termination
+4. Declarations: Verify all signals/variables used are declared
+5. Style: Check capitalization, whitespaces, and old-style constructs (see STYLE ISSUE DETECTION section below)
+6. Logic: Verify assignments make logical sense (no obvious contradictions)
+
+ISSUE GROUPING RULES (IMPORTANT - applies to ALL categories):
+- ALWAYS group similar issues of the same type together into a single issue entry with multiple line references
+- This rule applies to ALL categories: syntax, logic, style, and efficiency
+- Examples of issues that should be grouped (across all categories):
+  * Syntax: Multiple missing semicolons → one issue with all affected lines
+  * Logic: Multiple unassigned output ports → one issue with all affected lines
+  * Logic: Multiple duplicate assignments to different signals → separate issues (different signals), but if same signal has multiple duplicate assignments → one issue
+  * Style: Multiple missing spaces of the same type (e.g., all missing spaces before "<=" operators) → one issue with all affected lines
+  * Style: Multiple capitalization inconsistencies of the same type (e.g., all uppercase library names) → one issue with all affected lines
+  * Efficiency: Multiple redundant operations of the same type → one issue with all affected lines
+- Use the "lines" array to include all line numbers where the same issue occurs
+- For consecutive lines with the same issue, use a single range object: {"start": 41, "end": 45} instead of multiple individual entries
+- For non-consecutive lines, use separate entries: [{"start": 10, "end": 10}, {"start": 25, "end": 25}]
+- Only create separate issues if they are fundamentally different problems (e.g., missing spaces vs capitalization vs old-style constructs, or syntax errors vs logic errors)
+- Examples:
+  * If lines 41, 42, 43, 44, 45 (consecutive) all have "missing space before <=", report ONE issue with lines: [{"start": 41, "end": 45}]
+  * If lines 10, 15, 20 (non-consecutive) all have "missing space before <=", report ONE issue with lines: [{"start": 10, "end": 10}, {"start": 15, "end": 15}, {"start": 20, "end": 20}]
+  * If lines 5-8 and 12-15 (two consecutive ranges) have the same issue, report ONE issue with lines: [{"start": 5, "end": 8}, {"start": 12, "end": 15}]
+
+FALSE POSITIVE PREVENTION RULES:
+1. If you are unsure whether something is an issue, DO NOT report it
+2. Do NOT report potential issues, edge cases, or "could be better" suggestions
+3. Do NOT infer problems that require simulation or complex analysis to verify
+4. Only report issues that are immediately visible in the code structure
+5. Do NOT report issues based on assumptions about intended behavior
+6. If code appears correct, return empty array: "issuesFound": []
+
+STYLE ISSUE DETECTION (MANDATORY CHECKS - verify ALL of these):
+1. CAPITALIZATION CONSISTENCY:
+   - Library names: Check if "library IEEE;" should be "library ieee;" (modern VHDL uses lowercase)
+   - Package names: Check if "use IEEE.STD_LOGIC_1164.all;" should be "use ieee.std_logic_1164.all;" (modern VHDL uses lowercase)
+   - Signal/port names: Check for inconsistent casing (e.g., "CLK" vs "clk", "START" vs "start") - modern VHDL prefers lowercase
+   - Report as "style" category, "medium" severity if capitalization is inconsistent
+
+2. WHITESPACE REQUIREMENTS:
+   - Assignment operators: Check for missing space before "<=" (e.g., "signal<=value" should be "signal <= value")
+   - Sensitivity lists: Check for missing spaces after commas (e.g., "process(a,b,c)" should be "process(a, b, c)")
+   - Expression operators: Check for missing spaces around operators in expressions
+   - Report as "style" category, "medium" severity if whitespaces are missing
+
+3. OLD-STYLE CONSTRUCTS:
+   - Clock edge detection: Check for "CLK'event and CLK='0'" or "CLK'event and CLK='1'" instead of "falling_edge(CLK)" or "rising_edge(CLK)"
+   - Report as "style" category, "medium" severity for old-style clock edge detection
+
+4. VHDL BEST PRACTICES:
+   - Prefer lowercase for all identifiers (libraries, packages, signals, ports)
+   - Use modern functions (rising_edge/falling_edge) instead of 'event attribute
+   - Consistent spacing improves readability
+
+STRUCTURED VALIDATION (before finalizing response, verify):
+1. Each issue category matches the issue type exactly (syntax/logic/style/efficiency)
+2. Line numbers are accurate and correspond to actual code lines
+3. Severity level matches the impact (critical = won't compile, high = functional error, medium = style/efficiency, low = minor style)
+4. Similar issues are grouped together (e.g., all missing spaces before "<=" in one issue with multiple line references)
+5. No issues are reported that aren't clearly and unambiguously present in the code
+6. Each reported issue can be verified by reading the code at the specified line numbers
+7. For style issues: Have you checked capitalization (library/package/signal names)? Have you checked whitespaces (around operators, in lists)? Have you checked for old-style constructs?
+8. If no clear issues exist, issuesFound array is empty
+
+ACCURACY OVER COMPREHENSIVENESS:
+- It is BETTER to miss an issue than to report a false positive
+- Precision is more important than recall
+- Only report issues you are 100% certain about
+- When in doubt, leave it out
 
 For each issue:
-- Use precise line numbers (start and end can be the same for single-line issues)
+- Use precise, verified line numbers (count carefully from line 1)
 - Choose category that matches the issue type exactly
-- Assign severity based on impact (critical > high > medium > low)
+- Assign severity using the exact guidelines above
 - Provide clear, specific description of what is wrong
 - Include actionable suggestions to fix the issue
 
