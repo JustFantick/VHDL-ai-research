@@ -1,25 +1,27 @@
 import { ModelConfig } from "../types";
 
+const MAX_TOKENS = 16000;
+
 export const MODEL_CONFIGS: ModelConfig[] = [
   {
-    name: "GPT-4o Mini",
+    name: "GPT-5 Nano",
     provider: "openai",
-    modelId: "gpt-4o-mini",
-    maxTokens: 4000,
+    modelId: "gpt-5-nano",
+    maxTokens: MAX_TOKENS,
     temperature: 0.1,
   },
-  /*{
-    name: "Claude Sonnet 4",
-    provider: "anthropic",
-    modelId: "claude-3-5-sonnet-20241022",
-    maxTokens: 4000,
-    temperature: 0.1,
-  },*/
   {
-    name: "Gemini 2.0 Flash",
+    name: "Claude Sonnet 4.5",
+    provider: "anthropic",
+    modelId: "claude-sonnet-4-5",
+    maxTokens: MAX_TOKENS,
+    temperature: 0.1,
+  },
+  {
+    name: "Gemini 2.5 Flash Lite",
     provider: "google",
-    modelId: "gemini-2.0-flash-exp",
-    maxTokens: 4000,
+    modelId: "gemini-2.5-flash-lite",
+    maxTokens: MAX_TOKENS,
     temperature: 0.1,
   },
 ];

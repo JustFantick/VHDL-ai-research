@@ -7,7 +7,7 @@ export interface Issue {
   id: string;
   description: string;
   lines: LineReference[];
-  category: "syntax" | "logic" | "style" | "performance";
+  category: "syntax" | "logic" | "style" | "efficiency";
   severity: "critical" | "high" | "medium" | "low";
   suggestions: string[];
   reasoning: string;
@@ -34,7 +34,7 @@ export interface AIResponse {
 export interface StructuredIssue {
   description: string;
   lines: LineReference[];
-  category: "syntax" | "logic" | "style" | "performance";
+  category: "syntax" | "logic" | "style" | "efficiency";
   severity: "critical" | "high" | "medium" | "low";
   suggestions: string[];
 }

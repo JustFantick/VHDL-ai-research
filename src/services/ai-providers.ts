@@ -49,41 +49,56 @@ export class AIProviderService {
   }
 
   private createVHDLAnalysisPrompt(vhdlCode: string): string {
-    return `Analyze the following VHDL code for errors, inefficiencies, and potential improvements. Provide your analysis in JSON format with the following structure:
+    return `Analyze the following VHDL code for errors and issues. Report ONLY clear, unambiguous issues that can be objectively verified. Provide your analysis in JSON format with the following EXACT structure:
 
 {
   "issuesFound": [
     {
       "description": "specific issue description",
       "lines": [{"start": 21, "end": 21}],
-      "category": "syntax|logic|style|performance",
+      "category": "syntax|logic|style|efficiency",
       "severity": "critical|high|medium|low",
-      "suggestions": ["specific suggestions to fix this issue"]
+      "suggestions": ["specific suggestion to fix this issue"]
     }
   ],
-  "confidence": 0.85,
+  "confidence": 0.0-1.0,
   "reasoning": "brief explanation of your analysis"
 }
 
-Focus on:
-1. Syntax errors (missing semicolons, undeclared variables, etc.)
-2. Logic errors (race conditions, overflow, dead states, etc.)
-3. Performance inefficiencies (inefficient algorithms, redundant operations)
-4. Code style issues (naming conventions, spacing, old-style constructs)
-5. Best practices violations
+CATEGORY DEFINITIONS (use exactly these):
+- "syntax": Compilation errors that prevent code from compiling (missing semicolons, parentheses, undeclared identifiers, type mismatches)
+- "logic": Functional errors that cause incorrect behavior (wrong assignments, missing assignments, incorrect logic expressions, race conditions, unreachable states)
+- "style": Code style violations following VHDL conventions (inconsistent capitalization, old-style constructs like 'event instead of rising_edge, missing spaces, naming conventions)
+- "efficiency": Suboptimal implementations that waste resources (redundant logic, unnecessary processes for combinational logic, inefficient algorithms)
 
-For each issue, specify:
-- Line range where the issue occurs (start and end line numbers)
-- Appropriate category and severity level
-- Clear description of the problem
-- Specific suggestions to fix this particular issue
+SEVERITY GUIDELINES:
+- "critical": Code will not compile or will cause simulation errors (syntax errors, missing declarations)
+- "high": Code compiles but has functional errors that will cause incorrect behavior (wrong logic, missing assignments, unassigned outputs)
+- "medium": Code works but has style issues or moderate efficiency problems (old-style constructs, redundant operations, style violations)
+- "low": Minor style issues or very minor efficiency improvements (spacing, minor naming inconsistencies)
+
+IMPORTANT RULES:
+1. Report ONLY unambiguous issues - if you're unsure, do not report it
+2. Each issue must be objectively verifiable (compiler would catch it, or can be verified through code analysis)
+3. Do NOT report subjective preferences or optional optimizations unless they are clear issues
+4. Use exact category names: "syntax", "logic", "style", "efficiency" (NOT "performance")
+5. Line numbers must be accurate (1-indexed, where line 1 is the first line of code)
+6. If no issues are found, return empty array: "issuesFound": []
+7. Focus on issues that exist, not suggestions for "better" code unless it's a clear problem
+
+For each issue:
+- Use precise line numbers (start and end can be the same for single-line issues)
+- Choose category that matches the issue type exactly
+- Assign severity based on impact (critical > high > medium > low)
+- Provide clear, specific description of what is wrong
+- Include actionable suggestions to fix the issue
 
 VHDL Code:
 \`\`\`vhdl
 ${vhdlCode}
 \`\`\`
 
-Respond only with valid JSON.`;
+Respond ONLY with valid JSON. Do not include any text outside the JSON structure.`;
   }
 
   private async analyzeWithOpenAI(
@@ -97,8 +112,9 @@ Respond only with valid JSON.`;
     const response = await this.openai.chat.completions.create({
       model: config.modelId,
       messages: [{ role: "user", content: prompt }],
-      max_tokens: config.maxTokens,
-      temperature: config.temperature,
+      //max_tokens: config.maxTokens, // OpenAI does not support max_tokens
+      //temperature: config.temperature, // GPT-5 family models does not support temperature
+      //seed: 42,
     });
 
     const content = response.choices[0]?.message?.content;
@@ -154,11 +170,36 @@ Respond only with valid JSON.`;
 
   private parseAIResponse(content: string): AnalysisResult {
     try {
-      const cleaned = content
+      let cleaned = content
         .replace(/```json\n?/g, "")
         .replace(/```\n?/g, "")
         .trim();
-      const parsed = JSON.parse(cleaned);
+
+      const firstBrace = cleaned.indexOf("{");
+      if (firstBrace === -1) {
+        throw new Error("No JSON object found in response");
+      }
+
+      let braceCount = 0;
+      let jsonEnd = -1;
+      for (let i = firstBrace; i < cleaned.length; i++) {
+        if (cleaned[i] === "{") {
+          braceCount++;
+        } else if (cleaned[i] === "}") {
+          braceCount--;
+          if (braceCount === 0) {
+            jsonEnd = i + 1;
+            break;
+          }
+        }
+      }
+
+      if (jsonEnd === -1) {
+        throw new Error("Incomplete JSON object in response");
+      }
+
+      const jsonString = cleaned.substring(firstBrace, jsonEnd);
+      const parsed = JSON.parse(jsonString);
 
       const issuesFound: StructuredIssue[] = (parsed.issuesFound || []).map(
         (issue: any) => ({
