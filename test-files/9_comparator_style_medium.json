@@ -17,25 +17,13 @@
           "Use lowercase keywords: 'entity', 'port', 'end' for modern VHDL style"
         ],
         "reasoning": "Modern VHDL style conventions prefer lowercase keywords. Uppercase keywords are outdated and reduce code readability."
-      },
-      {
-        "id": "missing_spaces_colons",
-        "description": "Missing spaces around colons in port declarations",
-        "lines": [{ "start": 6, "end": 7 }],
-        "category": "style",
-        "severity": "medium",
-        "suggestions": [
-          "Add spaces around colons: 'a : in' instead of 'a:in'",
-          "Add spaces around colons: 'y : out' instead of 'y:out'"
-        ],
-        "reasoning": "VHDL style guidelines recommend spaces around colons in port declarations for better readability."
       }
     ],
     "metadata": {
-      "totalIssues": 2,
+      "totalIssues": 1,
       "criticalIssues": 0,
       "highIssues": 0,
-      "mediumIssues": 2,
+      "mediumIssues": 1,
       "lowIssues": 0,
       "categories": ["style"]
     }

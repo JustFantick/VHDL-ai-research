@@ -8,19 +8,6 @@
   "groundTruth": {
     "issues": [
       {
-        "id": "race_condition_feedback",
-        "description": "Race condition: D depends on Q, creating a feedback loop where D is assigned from Q while Q is assigned from D on clock edge",
-        "lines": [{ "start": 41, "end": 42 }],
-        "category": "logic",
-        "severity": "high",
-        "suggestions": [
-          "Remove Q from the sensitivity list and from D assignments",
-          "D should only depend on state signals (a0-a3) and inputs (x1-x4), not on Q directly",
-          "The feedback loop D -> Q -> D creates timing uncertainty and race conditions"
-        ],
-        "reasoning": "The next state signal D depends on the current state Q, while Q is assigned from D on the clock edge. This creates a combinational feedback loop that can cause race conditions and timing uncertainty, as D's value depends on Q which was itself derived from the previous D value."
-      },
-      {
         "id": "duplicate_assignment_y1",
         "description": "y1 assigned twice with different logic: first assignment overwritten by second assignment with incorrect logic",
         "lines": [{ "start": 48, "end": 48 }, { "start": 51, "end": 51 }],
@@ -46,9 +33,9 @@
       }
     ],
     "metadata": {
-      "totalIssues": 3,
+      "totalIssues": 2,
       "criticalIssues": 0,
-      "highIssues": 3,
+      "highIssues": 2,
       "mediumIssues": 0,
       "lowIssues": 0,
       "categories": ["logic"]

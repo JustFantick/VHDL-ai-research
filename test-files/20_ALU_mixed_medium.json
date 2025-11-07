@@ -20,6 +20,18 @@
         "reasoning": "The port declaration has the opening parenthesis on a separate line (line 6) but the closing parenthesis on the same line as the last port (line 11). This inconsistent formatting reduces code readability and violates style guidelines."
       },
       {
+        "id": "uppercase_library_clauses",
+        "description": "Old-style uppercase library/use clauses (library IEEE; use IEEE...) instead of lowercase",
+        "lines": [{ "start": 1, "end": 3 }],
+        "category": "style",
+        "severity": "medium",
+        "suggestions": [
+          "Use lowercase library clause: 'library ieee;'",
+          "Use lowercase use clauses: 'use ieee.std_logic_1164.all;' and 'use ieee.numeric_std.all;'"
+        ],
+        "reasoning": "Modern VHDL style conventions prefer lowercase for library and package names. Uppercase clauses reduce consistency and readability compared to the rest of the codebase."
+      },
+      {
         "id": "swapped_cin_logic_subr",
         "description": "SUBR operation has swapped carry-in logic - when cin='1' it subtracts 1, when cin='0' it doesn't, which is backwards",
         "lines": [{ "start": 34, "end": 39 }],
@@ -46,10 +58,10 @@
       }
     ],
     "metadata": {
-      "totalIssues": 3,
+      "totalIssues": 4,
       "criticalIssues": 0,
       "highIssues": 1,
-      "mediumIssues": 1,
+      "mediumIssues": 2,
       "lowIssues": 1,
       "categories": ["style", "logic", "efficiency"]
     }

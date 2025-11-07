@@ -10,14 +10,16 @@
       {
         "id": "inconsistent_keyword_casing",
         "description": "Inconsistent keyword casing - using uppercase TYPE, IS, ARRAY, TO, OF, STD_LOGIC_VECTOR, DOWNTO while rest of code uses lowercase keywords",
-        "lines": [{ "start": 16, "end": 16 }],
+        "lines": [{ "start": 1, "end": 3 }, { "start": 16, "end": 16 }],
         "category": "style",
         "severity": "medium",
         "suggestions": [
+          "Use lowercase library clause: 'library ieee;'",
+          "Use lowercase use clauses: 'use ieee.std_logic_1164.all;' and 'use ieee.numeric_std.all;'",
           "Use lowercase keywords consistently: 'type ram_array_t is array (0 to 127) of std_logic_vector(7 downto 0);'",
           "Follow modern VHDL style conventions with lowercase keywords throughout the file"
         ],
-        "reasoning": "Old-style VHDL used uppercase keywords, but modern VHDL style conventions prefer lowercase. Mixing styles within the same file creates inconsistency and reduces readability."
+        "reasoning": "Old-style VHDL used uppercase keywords, but modern VHDL style conventions prefer lowercase. Mixing styles within the same file (library/use clauses and type declaration) creates inconsistency and reduces readability."
       },
       {
         "id": "redundant_type_conversions",

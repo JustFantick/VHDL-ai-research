@@ -32,6 +32,18 @@
         "reasoning": "Comparing a boolean variable to 'true' is redundant. The boolean value can be used directly in the condition, which is cleaner and more idiomatic VHDL."
       },
       {
+        "id": "concatenation_type_mismatch",
+        "description": "Attempting to concatenate std_logic_vector with array slice causes type mismatch and prevents compilation",
+        "lines": [{ "start": 27, "end": 27 }],
+        "category": "syntax",
+        "severity": "critical",
+        "suggestions": [
+          "Replace the concurrent assignment with a loop that shifts array elements individually",
+          "Or use a temporary array of the same type for concatenation before assigning back to elem_array"
+        ],
+        "reasoning": "Expression 'empty_elem & elem_array(ELEM_NUM-1 downto 1)' concatenates a std_logic_vector with an array of std_logic_vector, which is illegal in VHDL and results in a compilation error."
+      },
+      {
         "id": "inefficient_loop_for_simple_assignment",
         "description": "Using inefficient for loop with conditional check to perform simple array assignment",
         "lines": [{ "start": 31, "end": 35 }],
@@ -57,12 +69,12 @@
       }
     ],
     "metadata": {
-      "totalIssues": 4,
-      "criticalIssues": 0,
+      "totalIssues": 5,
+      "criticalIssues": 1,
       "highIssues": 1,
       "mediumIssues": 1,
       "lowIssues": 2,
-      "categories": ["style", "performance", "logic"]
+      "categories": ["style", "syntax", "performance", "logic"]
     }
   }
 }

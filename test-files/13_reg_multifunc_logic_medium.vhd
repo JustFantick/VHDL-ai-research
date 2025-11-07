@@ -9,7 +9,7 @@ entity shift_registers_0 is
         clk : in std_logic;
         clken : in std_logic;
         SI : in std_logic;
-        SO : out std_logic;
+        SO : out std_logic
     );
 end shift_registers_0;
 
