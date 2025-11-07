@@ -48,6 +48,19 @@ export class AIProviderService {
     }
   }
 
+  async sendPrompt(config: ModelConfig, prompt: string): Promise<string> {
+    switch (config.provider) {
+      case "openai":
+        return this.sendPromptOpenAI(config, prompt);
+      case "anthropic":
+        return this.sendPromptAnthropic(config, prompt);
+      case "google":
+        return this.sendPromptGoogle(config, prompt);
+      default:
+        throw new Error(`Unsupported provider: ${config.provider}`);
+    }
+  }
+
   private createVHDLAnalysisPrompt(vhdlCode: string): string {
     return `Analyze the following VHDL code for errors and issues. ACCURACY IS MORE IMPORTANT THAN COMPREHENSIVENESS. Report ONLY clear, unambiguous issues that can be objectively verified. If you are uncertain about an issue, DO NOT report it.
 
@@ -301,5 +314,76 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
     } catch (error) {
       throw new Error(`Failed to parse AI response: ${error}`);
     }
+  }
+
+  private async sendPromptOpenAI(
+    config: ModelConfig,
+    prompt: string
+  ): Promise<string> {
+    if (!this.openai) {
+      throw new Error("OpenAI API key not configured");
+    }
+
+    const response = await this.openai.chat.completions.create({
+      model: config.modelId,
+      messages: [{ role: "user", content: prompt }],
+      seed: config.seed,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response content from OpenAI");
+    }
+
+    return content;
+  }
+
+  private async sendPromptAnthropic(
+    config: ModelConfig,
+    prompt: string
+  ): Promise<string> {
+    if (!this.anthropic) {
+      throw new Error("Anthropic API key not configured");
+    }
+
+    const response = await this.anthropic.messages.create({
+      model: config.modelId,
+      max_tokens: config.maxTokens,
+      temperature: config.temperature,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const content = response.content[0];
+    if (content.type !== "text") {
+      throw new Error("Unexpected response type from Anthropic");
+    }
+
+    return content.text;
+  }
+
+  private async sendPromptGoogle(
+    config: ModelConfig,
+    prompt: string
+  ): Promise<string> {
+    if (!this.google) {
+      throw new Error("Google API key not configured");
+    }
+
+    const model = this.google.getGenerativeModel({ model: config.modelId });
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: config.temperature,
+        maxOutputTokens: config.maxTokens,
+      },
+    });
+    const response = await result.response;
+    const content = response.text();
+
+    if (!content) {
+      throw new Error("No response content from Google");
+    }
+
+    return content;
   }
 }
