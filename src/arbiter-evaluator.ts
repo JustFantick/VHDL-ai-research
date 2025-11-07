@@ -69,7 +69,6 @@ interface EvaluationResult {
   precision: number;
   recall: number;
   f1Score: number;
-  arbiterConfidence: number;
   processingTimeMs: number;
   success: boolean;
 }
@@ -389,12 +388,6 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
           ? 2 * ((precision * recall) / (precision + recall))
           : 0;
 
-      const avgConfidence =
-        modelResult.matches.length > 0
-          ? modelResult.matches.reduce((sum, m) => sum + m.confidence, 0) /
-            modelResult.matches.length
-          : 0;
-
       this.results.push({
         testFile: testFileName,
         model: modelResult.model,
@@ -408,7 +401,6 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
         precision,
         recall,
         f1Score,
-        arbiterConfidence: avgConfidence * 100,
         processingTimeMs: processingTime,
         success: true,
       });
@@ -435,7 +427,6 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
           precision: 0,
           recall: 0,
           f1Score: 0,
-          arbiterConfidence: 0,
           processingTimeMs: 0,
           success: false,
         });
@@ -461,7 +452,6 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
       "Precision (%)",
       "Recall (%)",
       "F1 Score (%)",
-      "Arbiter Confidence (%)",
       "Processing Time (ms)",
       "Success",
     ].join(",");
@@ -480,7 +470,6 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
         r.precision.toFixed(2),
         r.recall.toFixed(2),
         r.f1Score.toFixed(2),
-        r.arbiterConfidence.toFixed(2),
         r.processingTimeMs,
         r.success,
       ].join(",")
