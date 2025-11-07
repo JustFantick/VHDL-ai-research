@@ -64,7 +64,9 @@ export class TestRunner {
   private async runTestForFile(testFile: VHDLTestFile): Promise<void> {
     const results: AIResponse[] = [];
 
-    for (const modelConfig of this.config.models) {
+    const processModel = async (
+      modelConfig: ModelConfig
+    ): Promise<AIResponse> => {
       try {
         console.log(`  Testing with ${modelConfig.name}...`);
 
@@ -75,7 +77,11 @@ export class TestRunner {
         );
         const processingTime = Date.now() - startTime;
 
-        const response: AIResponse = {
+        console.log(
+          `    ✓ ${modelConfig.name} completed in ${processingTime}ms`
+        );
+
+        return {
           model: modelConfig.name,
           timestamp: new Date(),
           testFileId: testFile.id,
@@ -83,15 +89,10 @@ export class TestRunner {
           processingTimeMs: processingTime,
           success: true,
         };
-
-        results.push(response);
-        console.log(`    ✓ Completed in ${processingTime}ms`);
-
-        await this.delay(this.config.requestDelayMs);
       } catch (error) {
         console.error(`    ✗ Error with ${modelConfig.name}:`, error);
 
-        const errorResponse: AIResponse = {
+        return {
           model: modelConfig.name,
           timestamp: new Date(),
           testFileId: testFile.id,
@@ -104,11 +105,23 @@ export class TestRunner {
           success: false,
           error: error instanceof Error ? error.message : "Unknown error",
         };
+      }
+    };
 
-        results.push(errorResponse);
+    const modelConfigs = this.config.models;
+    const batchSize = this.config.maxConcurrentRequests || modelConfigs.length;
+
+    for (let i = 0; i < modelConfigs.length; i += batchSize) {
+      const batch = modelConfigs.slice(i, i + batchSize);
+      const batchResults = await Promise.all(batch.map(processModel));
+      results.push(...batchResults);
+
+      if (i + batchSize < modelConfigs.length) {
+        await this.delay(this.config.requestDelayMs);
       }
     }
 
+    await this.delay(this.config.requestDelayMs);
     await this.saveResults(testFile, results);
   }
 
