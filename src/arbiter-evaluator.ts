@@ -2,7 +2,7 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import { AIProviderService } from "./services/ai-providers";
 import { MODEL_CONFIGS } from "./config/models";
-import { Issue, AIResponse } from "./types";
+import { Issue, AIResponse, TokenUsage } from "./types";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -69,6 +69,10 @@ interface EvaluationResult {
   precision: number;
   recall: number;
   f1Score: number;
+  matchRate: number;
+  inputTokens: number;
+  outputTokens: number;
+  costPerRequest: number;
   processingTimeMs: number;
   success: boolean;
 }
@@ -113,7 +117,7 @@ class ArbiterEvaluator {
 
       try {
         const startTime = Date.now();
-        const arbiterResult = await this.evaluateWithArbiter(
+        const { arbiterResult, tokenUsage } = await this.evaluateWithArbiter(
           gtFile,
           responseFiles
         );
@@ -124,6 +128,7 @@ class ArbiterEvaluator {
           gtFile,
           responseFiles,
           arbiterResult,
+          tokenUsage,
           processingTime
         );
 
@@ -191,12 +196,14 @@ class ArbiterEvaluator {
   private async evaluateWithArbiter(
     groundTruth: GroundTruthFile,
     responseFiles: ResponseFile[]
-  ): Promise<ArbiterResponse> {
+  ): Promise<{ arbiterResult: ArbiterResponse; tokenUsage: TokenUsage }> {
     const prompt = this.createArbiterPrompt(groundTruth, responseFiles);
 
-    const response = await this.callArbiter(prompt);
+    const { content, usage } = await this.callArbiter(prompt);
 
-    return this.parseArbiterResponse(response);
+    const arbiterResult = this.parseArbiterResponse(content);
+
+    return { arbiterResult, tokenUsage: usage };
   }
 
   private createArbiterPrompt(
@@ -284,17 +291,14 @@ You must respond with ONLY valid JSON in this exact format:
 Respond ONLY with valid JSON. Do not include any text outside the JSON structure.`;
   }
 
-  private async callArbiter(prompt: string): Promise<string> {
+  private async callArbiter(
+    prompt: string
+  ): Promise<{ content: string; usage: TokenUsage }> {
     if (!this.arbiterConfig) {
       throw new Error("Arbiter model (Claude Sonnet 4.5) not found in config");
     }
 
-    const response = await this.aiService.sendPrompt(
-      this.arbiterConfig,
-      prompt
-    );
-
-    return response;
+    return await this.aiService.sendPromptWithUsage(this.arbiterConfig, prompt);
   }
 
   private parseArbiterResponse(response: string): ArbiterResponse {
@@ -349,6 +353,7 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
     groundTruth: GroundTruthFile,
     responseFiles: ResponseFile[],
     arbiterResult: ArbiterResponse,
+    tokenUsage: TokenUsage,
     processingTime: number
   ) {
     const allModelResponses = new Map<string, AIResponse>();
@@ -388,6 +393,13 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
           ? 2 * ((precision * recall) / (precision + recall))
           : 0;
 
+      const matchRate =
+        groundTruth.groundTruth.issues.length > 0
+          ? (truePositives / groundTruth.groundTruth.issues.length) * 100
+          : 0;
+
+      const costPerRequest = this.calculateCost(tokenUsage);
+
       this.results.push({
         testFile: testFileName,
         model: modelResult.model,
@@ -401,6 +413,10 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
         precision,
         recall,
         f1Score,
+        matchRate,
+        inputTokens: tokenUsage.inputTokens,
+        outputTokens: tokenUsage.outputTokens,
+        costPerRequest,
         processingTimeMs: processingTime,
         success: true,
       });
@@ -427,11 +443,30 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
           precision: 0,
           recall: 0,
           f1Score: 0,
+          matchRate: 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          costPerRequest: 0,
           processingTimeMs: 0,
           success: false,
         });
       }
     }
+  }
+
+  private calculateCost(tokenUsage: TokenUsage): number {
+    if (!this.arbiterConfig?.pricing) {
+      return 0;
+    }
+
+    const inputCost =
+      (tokenUsage.inputTokens / 1_000_000) *
+      this.arbiterConfig.pricing.inputPer1M;
+    const outputCost =
+      (tokenUsage.outputTokens / 1_000_000) *
+      this.arbiterConfig.pricing.outputPer1M;
+
+    return inputCost + outputCost;
   }
 
   private async saveResultsToCsv() {
@@ -452,6 +487,10 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
       "Precision (%)",
       "Recall (%)",
       "F1 Score (%)",
+      "Match Rate (%)",
+      "Input Tokens",
+      "Output Tokens",
+      "Cost per Request ($)",
       "Processing Time (ms)",
       "Success",
     ].join(",");
@@ -470,6 +509,10 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
         r.precision.toFixed(2),
         r.recall.toFixed(2),
         r.f1Score.toFixed(2),
+        r.matchRate.toFixed(2),
+        r.inputTokens,
+        r.outputTokens,
+        r.costPerRequest.toFixed(6),
         r.processingTimeMs,
         r.success,
       ].join(",")

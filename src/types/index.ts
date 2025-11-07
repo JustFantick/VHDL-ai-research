@@ -21,6 +21,12 @@ export interface VHDLTestFile {
   difficulty: "easy" | "medium" | "hard";
 }
 
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+}
+
 export interface AIResponse {
   model: string;
   timestamp: Date;
@@ -29,6 +35,7 @@ export interface AIResponse {
   processingTimeMs: number;
   success: boolean;
   error?: string;
+  tokensUsed?: TokenUsage;
 }
 
 export interface StructuredIssue {
@@ -45,6 +52,11 @@ export interface AnalysisResult {
   reasoning: string;
 }
 
+export interface ModelPricing {
+  inputPer1M: number;
+  outputPer1M: number;
+}
+
 export interface ModelConfig {
   name: string;
   provider: "openai" | "anthropic" | "google";
@@ -52,6 +64,7 @@ export interface ModelConfig {
   maxTokens: number;
   temperature?: number;
   seed?: number;
+  pricing?: ModelPricing;
 }
 
 export interface TestConfig {

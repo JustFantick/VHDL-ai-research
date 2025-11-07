@@ -1,7 +1,12 @@
 import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { ModelConfig, AnalysisResult, StructuredIssue } from "../types";
+import {
+  ModelConfig,
+  AnalysisResult,
+  StructuredIssue,
+  TokenUsage,
+} from "../types";
 
 export class AIProviderService {
   private openai?: OpenAI;
@@ -48,6 +53,18 @@ export class AIProviderService {
     }
   }
 
+  async analyzeVHDLWithUsage(
+    config: ModelConfig,
+    vhdlCode: string
+  ): Promise<{ analysis: AnalysisResult; usage: TokenUsage }> {
+    const prompt = this.createVHDLAnalysisPrompt(vhdlCode);
+
+    const { content, usage } = await this.sendPromptWithUsage(config, prompt);
+    const analysis = this.parseAIResponse(content);
+
+    return { analysis, usage };
+  }
+
   async sendPrompt(config: ModelConfig, prompt: string): Promise<string> {
     switch (config.provider) {
       case "openai":
@@ -56,6 +73,22 @@ export class AIProviderService {
         return this.sendPromptAnthropic(config, prompt);
       case "google":
         return this.sendPromptGoogle(config, prompt);
+      default:
+        throw new Error(`Unsupported provider: ${config.provider}`);
+    }
+  }
+
+  async sendPromptWithUsage(
+    config: ModelConfig,
+    prompt: string
+  ): Promise<{ content: string; usage: TokenUsage }> {
+    switch (config.provider) {
+      case "openai":
+        return this.sendPromptOpenAIWithUsage(config, prompt);
+      case "anthropic":
+        return this.sendPromptAnthropicWithUsage(config, prompt);
+      case "google":
+        return this.sendPromptGoogleWithUsage(config, prompt);
       default:
         throw new Error(`Unsupported provider: ${config.provider}`);
     }
@@ -222,19 +255,43 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
       throw new Error("Anthropic API key not configured");
     }
 
-    const response = await this.anthropic.messages.create({
-      model: config.modelId,
-      max_tokens: config.maxTokens,
-      temperature: config.temperature,
-      messages: [{ role: "user", content: prompt }],
-    });
+    const maxRetries = 3;
+    let lastError: Error | undefined;
 
-    const content = response.content[0];
-    if (content.type !== "text") {
-      throw new Error("Unexpected response type from Anthropic");
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await this.anthropic.messages.create({
+          model: config.modelId,
+          max_tokens: config.maxTokens,
+          temperature: config.temperature,
+          messages: [{ role: "user", content: prompt }],
+        });
+
+        const content = response.content[0];
+        if (content.type !== "text") {
+          throw new Error("Unexpected response type from Anthropic");
+        }
+
+        return this.parseAIResponse(content.text);
+      } catch (error: any) {
+        lastError = error;
+
+        if (error.status === 529 || error.status === 503) {
+          const delay = Math.pow(2, attempt) * 1000;
+          console.log(
+            `  ⚠️  Anthropic overloaded, retrying in ${delay}ms (attempt ${
+              attempt + 1
+            }/${maxRetries})...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+
+        throw error;
+      }
     }
 
-    return this.parseAIResponse(content.text);
+    throw lastError || new Error("Failed after retries");
   }
 
   private async analyzeWithGoogle(
@@ -346,19 +403,43 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
       throw new Error("Anthropic API key not configured");
     }
 
-    const response = await this.anthropic.messages.create({
-      model: config.modelId,
-      max_tokens: config.maxTokens,
-      temperature: config.temperature,
-      messages: [{ role: "user", content: prompt }],
-    });
+    const maxRetries = 3;
+    let lastError: Error | undefined;
 
-    const content = response.content[0];
-    if (content.type !== "text") {
-      throw new Error("Unexpected response type from Anthropic");
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await this.anthropic.messages.create({
+          model: config.modelId,
+          max_tokens: config.maxTokens,
+          temperature: config.temperature,
+          messages: [{ role: "user", content: prompt }],
+        });
+
+        const content = response.content[0];
+        if (content.type !== "text") {
+          throw new Error("Unexpected response type from Anthropic");
+        }
+
+        return content.text;
+      } catch (error: any) {
+        lastError = error;
+
+        if (error.status === 529 || error.status === 503) {
+          const delay = Math.pow(2, attempt) * 1000;
+          console.log(
+            `  ⚠️  Anthropic overloaded, retrying in ${delay}ms (attempt ${
+              attempt + 1
+            }/${maxRetries})...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+
+        throw error;
+      }
     }
 
-    return content.text;
+    throw lastError || new Error("Failed after retries");
   }
 
   private async sendPromptGoogle(
@@ -385,5 +466,120 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
     }
 
     return content;
+  }
+
+  private async sendPromptOpenAIWithUsage(
+    config: ModelConfig,
+    prompt: string
+  ): Promise<{ content: string; usage: TokenUsage }> {
+    if (!this.openai) {
+      throw new Error("OpenAI API key not configured");
+    }
+
+    const response = await this.openai.chat.completions.create({
+      model: config.modelId,
+      messages: [{ role: "user", content: prompt }],
+      seed: config.seed,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response content from OpenAI");
+    }
+
+    const usage: TokenUsage = {
+      inputTokens: response.usage?.prompt_tokens || 0,
+      outputTokens: response.usage?.completion_tokens || 0,
+      totalTokens: response.usage?.total_tokens || 0,
+    };
+
+    return { content, usage };
+  }
+
+  private async sendPromptAnthropicWithUsage(
+    config: ModelConfig,
+    prompt: string
+  ): Promise<{ content: string; usage: TokenUsage }> {
+    if (!this.anthropic) {
+      throw new Error("Anthropic API key not configured");
+    }
+
+    const maxRetries = 3;
+    let lastError: Error | undefined;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await this.anthropic.messages.create({
+          model: config.modelId,
+          max_tokens: config.maxTokens,
+          temperature: config.temperature,
+          messages: [{ role: "user", content: prompt }],
+        });
+
+        const content = response.content[0];
+        if (content.type !== "text") {
+          throw new Error("Unexpected response type from Anthropic");
+        }
+
+        const usage: TokenUsage = {
+          inputTokens: response.usage.input_tokens,
+          outputTokens: response.usage.output_tokens,
+          totalTokens:
+            response.usage.input_tokens + response.usage.output_tokens,
+        };
+
+        return { content: content.text, usage };
+      } catch (error: any) {
+        lastError = error;
+
+        if (error.status === 529 || error.status === 503) {
+          const delay = Math.pow(2, attempt) * 1000;
+          console.log(
+            `  ⚠️  Anthropic overloaded, retrying in ${delay}ms (attempt ${
+              attempt + 1
+            }/${maxRetries})...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw lastError || new Error("Failed after retries");
+  }
+
+  private async sendPromptGoogleWithUsage(
+    config: ModelConfig,
+    prompt: string
+  ): Promise<{ content: string; usage: TokenUsage }> {
+    if (!this.google) {
+      throw new Error("Google API key not configured");
+    }
+
+    const model = this.google.getGenerativeModel({ model: config.modelId });
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: config.temperature,
+        maxOutputTokens: config.maxTokens,
+      },
+    });
+    const response = await result.response;
+    const content = response.text();
+
+    if (!content) {
+      throw new Error("No response content from Google");
+    }
+
+    const usageMetadata = response.usageMetadata;
+    const usage: TokenUsage = {
+      inputTokens: usageMetadata?.promptTokenCount || 0,
+      outputTokens: usageMetadata?.candidatesTokenCount || 0,
+      totalTokens: usageMetadata?.totalTokenCount || 0,
+    };
+
+    return { content, usage };
   }
 }

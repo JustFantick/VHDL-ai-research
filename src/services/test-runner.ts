@@ -7,6 +7,7 @@ import {
   ModelConfig,
   TestConfig,
   AnalysisResult,
+  TokenUsage,
 } from "../types";
 
 export class TestRunner {
@@ -71,7 +72,7 @@ export class TestRunner {
         console.log(`  Testing with ${modelConfig.name}...`);
 
         const startTime = Date.now();
-        const analysis = await this.aiService.analyzeVHDL(
+        const { analysis, usage } = await this.aiService.analyzeVHDLWithUsage(
           modelConfig,
           testFile.content
         );
@@ -88,6 +89,7 @@ export class TestRunner {
           response: analysis,
           processingTimeMs: processingTime,
           success: true,
+          tokensUsed: usage,
         };
       } catch (error) {
         console.error(`    ✗ Error with ${modelConfig.name}:`, error);
