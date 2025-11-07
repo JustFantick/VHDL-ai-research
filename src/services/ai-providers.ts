@@ -116,7 +116,7 @@ Provide your analysis in JSON format with the following EXACT structure:
 CATEGORY DEFINITIONS (use exactly these):
 - "syntax": Compilation errors that prevent code from compiling (missing semicolons, parentheses, undeclared identifiers, type mismatches)
 - "logic": Functional errors that cause incorrect behavior (wrong assignments, missing assignments, incorrect logic expressions, race conditions, unreachable states)
-- "style": Code style violations following VHDL conventions. MUST check for: (1) Inconsistent capitalization (library names like "IEEE" vs "ieee", signal names like "CLK" vs "clk", package names like "STD_LOGIC_1164" vs "std_logic_1164"), (2) Missing whitespaces (no spaces around assignment operators like "<=", no spaces in sensitivity lists like "process(x0,x1)" vs "process(x0, x1)"), (3) Old-style constructs (CLK'event instead of rising_edge/falling_edge), (4) Naming convention violations
+- "style": Code style violations following VHDL conventions. MUST check for: (1) Inconsistent capitalization (library names like "IEEE" vs "ieee", signal names like "CLK" vs "clk", package names like "STD_LOGIC_1164" vs "std_logic_1164"), (2) Missing whitespaces (no spaces around assignment operators like "<=", no spaces in sensitivity lists like "process(x0,x1)" vs "process(x0, x1)"), (3) Old-style constructs (CLK'event instead of rising_edge/falling_edge), (4) Naming convention violations (intentional uppercase acronyms such as "SI"/"SO" alongside lowercase names are acceptable and should not be flagged)
 - "efficiency": Suboptimal implementations that waste resources (redundant logic, unnecessary processes for combinational logic, inefficient algorithms)
 
 SEVERITY GUIDELINES (use these exact mappings):
@@ -191,6 +191,10 @@ STYLE ISSUE DETECTION (MANDATORY CHECKS - verify ALL of these):
    - Prefer lowercase for all identifiers (libraries, packages, signals, ports)
    - Use modern functions (rising_edge/falling_edge) instead of 'event attribute
    - Consistent spacing improves readability
+
+AMBIGUOUS CASES (DO NOT REPORT):
+- Uppercase acronyms intentionally preserved for ports or signals (e.g., "SI", "SO") mixed with lowercase names
+- Spacing around colons in port declarations (e.g., "a:in" vs "a : in")
 
 STRUCTURED VALIDATION (before finalizing response, verify):
 1. Each issue category matches the issue type exactly (syntax/logic/style/efficiency)
