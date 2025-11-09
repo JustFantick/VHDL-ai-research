@@ -2,7 +2,7 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import { AIProviderService } from "./services/ai-providers";
 import { MODEL_CONFIGS } from "./config/models";
-import { Issue, AIResponse, TokenUsage } from "./types";
+import { Issue, AIResponse, TokenUsage, ModelConfig } from "./types";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -393,12 +393,26 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
           ? 2 * ((precision * recall) / (precision + recall))
           : 0;
 
-      const matchRate =
+      const matchRate = Math.min(
+        100,
         groundTruth.groundTruth.issues.length > 0
           ? (truePositives / groundTruth.groundTruth.issues.length) * 100
-          : 0;
+          : 0
+      );
 
-      const costPerRequest = this.calculateCost(tokenUsage);
+      const modelTokenUsage = modelResponse.tokensUsed || {
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+      };
+
+      const modelConfig = MODEL_CONFIGS.find(
+        (m) => m.name === modelResult.model
+      );
+      const costPerRequest = this.calculateModelCost(
+        modelTokenUsage,
+        modelConfig
+      );
 
       this.results.push({
         testFile: testFileName,
@@ -414,10 +428,10 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
         recall,
         f1Score,
         matchRate,
-        inputTokens: tokenUsage.inputTokens,
-        outputTokens: tokenUsage.outputTokens,
+        inputTokens: modelTokenUsage.inputTokens,
+        outputTokens: modelTokenUsage.outputTokens,
         costPerRequest,
-        processingTimeMs: processingTime,
+        processingTimeMs: modelResponse.processingTimeMs,
         success: true,
       });
     }
@@ -465,6 +479,22 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
     const outputCost =
       (tokenUsage.outputTokens / 1_000_000) *
       this.arbiterConfig.pricing.outputPer1M;
+
+    return inputCost + outputCost;
+  }
+
+  private calculateModelCost(
+    tokenUsage: TokenUsage,
+    modelConfig?: ModelConfig
+  ): number {
+    if (!modelConfig?.pricing) {
+      return 0;
+    }
+
+    const inputCost =
+      (tokenUsage.inputTokens / 1_000_000) * modelConfig.pricing.inputPer1M;
+    const outputCost =
+      (tokenUsage.outputTokens / 1_000_000) * modelConfig.pricing.outputPer1M;
 
     return inputCost + outputCost;
   }
