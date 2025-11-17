@@ -91,11 +91,15 @@ class ArbiterEvaluator {
     this.aiService = new AIProviderService();
   }
 
-  async run() {
+  async run(specificFile?: string) {
     console.log("🔍 Starting arbiter evaluation...\n");
 
+    if (specificFile) {
+      console.log(`   Filtering for specific response file: ${specificFile}\n`);
+    }
+
     const groundTruthFiles = await this.loadGroundTruthFiles();
-    const responseFilesByTest = await this.loadAndGroupResponseFiles();
+    const responseFilesByTest = await this.loadAndGroupResponseFiles(specificFile);
 
     let successCount = 0;
     let failureCount = 0;
@@ -170,11 +174,18 @@ class ArbiterEvaluator {
     return groundTruthFiles;
   }
 
-  private async loadAndGroupResponseFiles(): Promise<
+  private async loadAndGroupResponseFiles(specificFile?: string): Promise<
     Map<string, ResponseFile[]>
   > {
     const files = await fs.readdir(this.responsesDir);
-    const jsonFiles = files.filter((f) => f.endsWith(".json"));
+    let jsonFiles = files.filter((f) => f.endsWith(".json"));
+
+    if (specificFile) {
+      jsonFiles = jsonFiles.filter((f) => f === specificFile);
+      if (jsonFiles.length === 0) {
+        console.log(`⚠️  File ${specificFile} not found in responses directory`);
+      }
+    }
 
     const grouped = new Map<string, ResponseFile[]>();
 
@@ -560,8 +571,10 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
 
 async function main() {
   try {
+    const specificFile = process.argv[2];
+    
     const evaluator = new ArbiterEvaluator();
-    await evaluator.run();
+    await evaluator.run(specificFile);
   } catch (error) {
     console.error("Fatal error:", error);
     process.exit(1);
