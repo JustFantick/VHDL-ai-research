@@ -8,15 +8,12 @@ import { TestConfig } from "./types";
 dotenv.config();
 
 async function main() {
-  const testFilesDir = "./test-files";
-  const testFiles = await discoverTestFiles(testFilesDir);
-
   const config: TestConfig = {
     models: MODEL_CONFIGS,
     testFiles: [
-      /*"./test-files/1_comparator_golden.vhd",*/
+      "./test-files/1_comparator_golden.vhd",
       "./test-files/2_shift_register_golden.vhd",
-      /*"./test-files/3_moore_fsm_golden.vhd",
+      "./test-files/3_moore_fsm_golden.vhd",
       "./test-files/4_viterbi_decoder_golden.vhd",
       "./test-files/5_testbench_moore_golden.vhd",
       "./test-files/6_code_converter_syntax_easy.vhd",
@@ -24,7 +21,7 @@ async function main() {
       "./test-files/8_generic_counter_syntax_hard.vhd",
       "./test-files/9_comparator_style_medium.vhd",
       "./test-files/10_moore_fsm_style_medium.vhd",
-      "./test-files/11_comparator_logic_easy.vhd"
+      "./test-files/11_comparator_logic_easy.vhd",
       "./test-files/12_counter_logic_easy.vhd",
       "./test-files/13_reg_multifunc_logic_medium.vhd",
       "./test-files/14_moore_fsm_logic_medium.vhd",
@@ -38,7 +35,7 @@ async function main() {
       "./test-files/22_priority_encoder_mixed_hard.vhd",
       "./test-files/23_bin-to-bcd_converter_mixed_hard.vhd",
       "./test-files/24_ram_controller_mixed_hard.vhd",
-      "./test-files/25_viterbi_decoder_mixed_hard.vhd",*/
+      "./test-files/25_viterbi_decoder_mixed_hard.vhd",
     ],
     outputDir: "./results",
     maxConcurrentRequests: parseInt(process.env.MAX_CONCURRENT_REQUESTS || "9"),
@@ -48,25 +45,6 @@ async function main() {
 
   const runner = new TestRunner(config);
   await runner.runTests();
-}
-
-async function discoverTestFiles(directory: string): Promise<string[]> {
-  if (!(await fs.pathExists(directory))) {
-    throw new Error(`Test files directory does not exist: ${directory}`);
-  }
-
-  const files = await fs.readdir(directory);
-  const vhdFiles = files
-    .filter((file) => file.endsWith(".vhd"))
-    .map((file) => path.join(directory, file))
-    .sort();
-
-  if (vhdFiles.length === 0) {
-    throw new Error(`No .vhd files found in directory: ${directory}`);
-  }
-
-  console.log(`Discovered ${vhdFiles.length} test files in ${directory}`);
-  return vhdFiles;
 }
 
 main().catch(console.error);
