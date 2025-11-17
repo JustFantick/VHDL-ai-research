@@ -1,13 +1,15 @@
 # VHDL AI Analysis Research Project
 
-This project tests how well different AI models can analyze VHDL code for errors and efficiency problems.
+Research project evaluating and comparing 9 AI models (OpenAI GPT-5 family, Anthropic Claude 4 family, Google Gemini 2.5 family) in analyzing VHDL hardware description language code.
 
 ## Features
 
-- Tests multiple AI models via API (OpenAI, Anthropic, Google)
-- Analyzes VHDL code for syntax errors, logic errors, and efficiency issues
-- Saves detailed results for comparison
-- Configurable test parameters
+- Tests 9 AI models via API (OpenAI, Anthropic, Google)
+- Analyzes VHDL code for syntax errors, logic errors, style issues, and efficiency problems
+- 25 curated test cases with ground truth annotations
+- AI arbiter for semantic evaluation of results
+- Detailed metrics: Precision, Recall, F1 Score
+- Saves results for comparison and analysis
 
 ## Setup
 
@@ -25,9 +27,9 @@ cp env.example .env
 
 Edit `.env` and add your API keys:
 
-- `OPENAI_API_KEY` - for GPT-4o Mini
-- `ANTHROPIC_API_KEY` - for Claude Sonnet 4
-- `GOOGLE_API_KEY` - for Gemini 2.0 Flash
+- `OPENAI_API_KEY` - for GPT-5, GPT-5 Mini, GPT-5 Nano
+- `ANTHROPIC_API_KEY` - for Claude Opus 4.1, Claude Sonnet 4.5, Claude Haiku 4.5
+- `GOOGLE_API_KEY` - for Gemini 2.5 Pro, Gemini 2.5 Flash, Gemini 2.5 Flash Lite
 
 3. Build the project:
 
@@ -37,16 +39,16 @@ npm run build
 
 ## Usage
 
-Run the analysis:
+Run the main analysis (all 9 models analyze all test files):
 
 ```bash
 npm start
 ```
 
-Or run in development mode:
+Run the AI arbiter evaluation (semantic comparison against ground truth):
 
 ```bash
-npm run dev
+npm run arbiter
 ```
 
 ## Project Structure
@@ -54,40 +56,18 @@ npm run dev
 ```
 ├── src/
 │   ├── config/
-│   │   └── models.ts          # AI model configurations
+│   │   └── models.ts          # AI model configurations (9 models)
 │   ├── services/
 │   │   ├── ai-providers.ts    # AI API integration
 │   │   └── test-runner.ts     # Test execution logic
 │   ├── types/
 │   │   └── index.ts           # TypeScript type definitions
-│   └── index.ts               # Main entry point
-├── test-files/                # VHDL test cases
-├── results/                   # Generated analysis results
-│   ├── responses/             # Individual AI responses
+│   ├── index.ts               # Main entry point
+│   └── arbiter-evaluator.ts   # AI arbiter semantic evaluation
+├── test-files/                # 25 VHDL test cases with ground truth
+├── results/
+│   ├── responses/             # Individual AI model responses (JSON)
+│   ├── normalyzed/            # Arbiter evaluation results (CSV)
 │   └── reports/               # Summary reports
 └── package.json
 ```
-
-## Test Files
-
-The project includes sample VHDL files with different types of issues:
-
-- `syntax_error.vhd` - Syntax errors
-- `logic_error.vhd` - Logic problems
-- `inefficient_code.vhd` - Performance issues
-- `style_issues.vhd` - Code style problems
-- `complex_design.vhd` - Complex mixed issues
-
-## Results
-
-Results are saved in JSON format with:
-
-- AI model responses
-- Processing times
-- Success/failure status
-- Analysis confidence scores
-- Detailed issue reports
-
-## Configuration
-
-Modify `src/config/models.ts` to add/remove AI models or adjust parameters.
