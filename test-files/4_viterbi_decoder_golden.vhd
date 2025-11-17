@@ -5,18 +5,16 @@ entity ViterbiDecoder is
     port (
         input : in std_logic_vector(1 downto 0);
         clk : in std_logic;
+        rst : in std_logic;
         output : out std_logic
     );
 end ViterbiDecoder;
 
 architecture ViterbiDecoder_behav of ViterbiDecoder is
-    type word_2 is array (1 downto 0) of std_logic_vector(1 downto 0);
     type word_4_NextState is array (3 downto 0) of std_logic_vector(1 downto 0);
     type word_3 is array (2 downto 0) of std_logic_vector(1 downto 0);
     type word_3_std is array (2 downto 0) of std_logic;
-    type word_4 is array (3 downto 0) of integer;
     type word_4_std is array (3 downto 0) of std_logic;
-    type memory_4 is array (3 downto 0) of word_2;
     type memory_4_std is array (3 downto 0) of word_4_std;
     type memory_4_NextState is array (3 downto 0) of word_4_NextState;
     type memory_8 is array (7 downto 0) of integer;
@@ -58,7 +56,8 @@ architecture ViterbiDecoder_behav of ViterbiDecoder is
             when "11" =>
                 return 2;
             when others =>
-                return -1;
+                assert false report "hammingDistance: invalid input" severity error;
+                return 0;
         end case;
     end hammingDistance;
 
@@ -74,57 +73,67 @@ architecture ViterbiDecoder_behav of ViterbiDecoder is
             when "11" =>
                 return 3;
             when others =>
-                return -1;
+                assert false report "conv_int: invalid input" severity error;
+                return 0;
         end case;
     end conv_int;
 
 begin
-    process(clk)
+    process(clk, rst)
         variable InitialState : std_logic_vector(1 downto 0) := "00";
-        variable TracebackResult : memory_8 := (0, 0, 0, 0, 0, 0, 0, 0);
-        variable InputLevel : integer := 0;
-        variable i : integer := 0;
-        variable chosenPathIndex : integer;
-        variable lowestPathMetricError : integer := 6;
-        variable currentState : std_logic_vector(1 downto 0);
-        variable outputVector : word_3_std;
-        variable temp_output : std_logic_vector(1 downto 0);
+        variable TracebackResult : memory_8 := (others => 0);
+        variable InputLevel : integer range 0 to TraceBackDepth - 1 := 0;
+        variable chosenPathIndex : integer range 0 to 7 := 0;
+        variable lowestPathMetricError : integer range 0 to 2 * TraceBackDepth := 0;
+        variable currentState : std_logic_vector(1 downto 0) := "00";
+        variable outputVector : word_3_std := (others => '0');
+        variable temp_output : std_logic_vector(1 downto 0) := "00";
+        variable state_index : integer range 0 to 3 := 0;
+        variable symbol_index : integer range 0 to 3 := 0;
     begin
-        if rising_edge(clk) and input /= "UU" then
-            i := 0;
-
-            while i < 8 loop
-                TracebackResult(i) := TracebackResult(i) + hammingDistance(traceback_table(3 - conv_int(InitialState))(7 - i)(2 - InputLevel) xor input);
-                i := i + 1;
+        if rst = '1' then
+            InitialState := "00";
+            TracebackResult := (others => 0);
+            InputLevel := 0;
+            chosenPathIndex := 0;
+            lowestPathMetricError := 0;
+            currentState := "00";
+            outputVector := (others => '0');
+            temp_output := "00";
+            state_index := 0;
+            symbol_index := 0;
+            output <= '0';
+        elsif rising_edge(clk) then
+            state_index := 3 - conv_int(InitialState);
+            for i in 0 to 7 loop
+                TracebackResult(i) := TracebackResult(i) + hammingDistance(traceback_table(state_index)(7 - i)(2 - InputLevel) xor input);
             end loop;
 
             output <= outputVector(InputLevel);
 
-            InputLevel := InputLevel + 1;
-            if InputLevel = TraceBackDepth then
-                i := 0;
-                while i < 8 loop
+            if InputLevel = TraceBackDepth - 1 then
+                lowestPathMetricError := 2 * TraceBackDepth;
+                for i in 0 to 7 loop
                     if lowestPathMetricError > TracebackResult(i) then
                         lowestPathMetricError := TracebackResult(i);
                         chosenPathIndex := i;
                     end if;
-                    i := i + 1;
                 end loop;
 
                 currentState := InitialState;
-                i := 0;
-                while i < TraceBackDepth loop
-                    temp_output := traceback_table(3 - conv_int(InitialState))(7 - chosenPathIndex)(2 - i);
-                    outputVector(i) := outputTable(3 - conv_int(currentState))(3 - conv_int(temp_output));
-                    currentState := nextStateTable(3 - conv_int(currentState))(3 - conv_int(temp_output));
-                    i := i + 1;
+                for i in 0 to TraceBackDepth - 1 loop
+                    state_index := 3 - conv_int(currentState);
+                    temp_output := traceback_table(state_index)(7 - chosenPathIndex)(2 - i);
+                    symbol_index := 3 - conv_int(temp_output);
+                    outputVector(i) := outputTable(state_index)(symbol_index);
+                    currentState := nextStateTable(state_index)(symbol_index);
                 end loop;
 
                 InitialState := currentState;
-
                 InputLevel := 0;
-                TracebackResult := (0, 0, 0, 0, 0, 0, 0, 0);
-                lowestPathMetricError := 6;
+                TracebackResult := (others => 0);
+            else
+                InputLevel := InputLevel + 1;
             end if;
         end if;
     end process;

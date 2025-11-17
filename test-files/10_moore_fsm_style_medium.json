@@ -8,22 +8,6 @@
   "groundTruth": {
     "issues": [
       {
-        "id": "inconsistent_capitalization",
-        "description": "Inconsistent capitalization: using uppercase for library names and signal names (IEEE, STD_LOGIC_1164, CLK) instead of lowercase",
-        "lines": [
-          { "start": 1, "end": 2 },
-          { "start": 6, "end": 6 }
-        ],
-        "category": "style",
-        "severity": "medium",
-        "suggestions": [
-          "Use lowercase for library names: 'library ieee;'",
-          "Use lowercase for use clause: 'use ieee.std_logic_1164.all;'",
-          "Use consistent lowercase for signal names: 'clk' instead of 'CLK'"
-        ],
-        "reasoning": "Modern VHDL style conventions prefer consistent lowercase for library names, package names, and signal identifiers for better readability and consistency."
-      },
-      {
         "id": "old_style_clock_edge",
         "description": "Old-style clock edge detection using 'event attribute instead of falling_edge function",
         "lines": [{ "start": 19, "end": 19 }],
@@ -36,24 +20,22 @@
         "reasoning": "Using falling_edge(clk) is the modern, recommended approach for detecting falling clock edges. Old-style 'event checks are more verbose and prone to errors."
       },
       {
-        "id": "missing_spaces",
-        "description": "Missing spaces in process sensitivity list and around assignment operators",
-        "lines": [{ "start": 39, "end": 45 }],
+        "id": "missing_spaces_sensitivity_list",
+        "description": "Missing spaces after commas in process sensitivity list",
+        "lines": [{ "start": 39, "end": 39 }],
         "category": "style",
         "severity": "medium",
         "suggestions": [
-          "Add spaces in sensitivity list: 'process(x0, x1, S0, S1, S2, S3)'",
-          "Add spaces around assignment operators: 'D(0) <= S0' instead of 'D(0)<=S0'",
-          "Add spaces around assignment operators: 'y1 <= S1' instead of 'y1<=S1'"
+          "Add spaces after commas in sensitivity list: 'process(x0, x1, S0, S1, S2, S3)' instead of 'process(x0,x1,S0,S1,S2,S3)'"
         ],
-        "reasoning": "Spaces around operators and between items in lists improve code readability and follow VHDL style guidelines."
+        "reasoning": "Missing spaces after commas in lists reduces readability and violates VHDL style guidelines for comma-separated lists."
       }
     ],
     "metadata": {
-      "totalIssues": 3,
+      "totalIssues": 2,
       "criticalIssues": 0,
       "highIssues": 0,
-      "mediumIssues": 3,
+      "mediumIssues": 2,
       "lowIssues": 0,
       "categories": ["style"]
     }

@@ -20,16 +20,16 @@
         "reasoning": "The port declaration has the opening parenthesis on a separate line (line 6) but the closing parenthesis on the same line as the last port (line 11). This inconsistent formatting reduces code readability and violates style guidelines."
       },
       {
-        "id": "uppercase_library_clauses",
-        "description": "Old-style uppercase library/use clauses (library IEEE; use IEEE...) instead of lowercase",
+        "id": "inconsistent_library_capitalization",
+        "description": "Inconsistent capitalization in library/use clauses - mixing uppercase (IEEE) and lowercase (std_logic_1164, numeric_std)",
         "lines": [{ "start": 1, "end": 3 }],
         "category": "style",
         "severity": "medium",
         "suggestions": [
-          "Use lowercase library clause: 'library ieee;'",
-          "Use lowercase use clauses: 'use ieee.std_logic_1164.all;' and 'use ieee.numeric_std.all;'"
+          "Use consistent lowercase: 'library ieee;', 'use ieee.std_logic_1164.all;', 'use ieee.numeric_std.all;'",
+          "Or use consistent uppercase: 'library IEEE;', 'use IEEE.STD_LOGIC_1164.all;', 'use IEEE.NUMERIC_STD.all;'"
         ],
-        "reasoning": "Modern VHDL style conventions prefer lowercase for library and package names. Uppercase clauses reduce consistency and readability compared to the rest of the codebase."
+        "reasoning": "The code mixes uppercase 'IEEE' with lowercase 'std_logic_1164.all' and 'numeric_std.all' in the same file. This inconsistency violates style guidelines - either all uppercase or all lowercase should be used consistently."
       },
       {
         "id": "swapped_cin_logic_subr",

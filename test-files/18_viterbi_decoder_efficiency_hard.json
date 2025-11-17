@@ -8,64 +8,40 @@
   "groundTruth": {
     "issues": [
       {
-        "id": "inefficient_array_reset",
-        "description": "Using loop to reset array instead of aggregate assignment",
-        "lines": [{ "start": 120, "end": 124 }],
-        "category": "efficiency",
-        "severity": "medium",
-        "suggestions": [
-          "Replace loop with aggregate assignment: 'TracebackResult := (0,0,0,0,0,0,0,0);'",
-          "Aggregate assignments are more efficient as they can be optimized by synthesis tools and executed in parallel"
-        ],
-        "reasoning": "Loop-based array reset requires sequential iterations and generates more logic. Aggregate assignment is more efficient for synthesis and can be optimized better by the compiler."
-      },
-      {
-        "id": "redundant_conv_int_in_branch_metric_loop",
-        "description": "conv_int(InitialState) called 8 times per clock cycle in loop even though InitialState doesn't change",
-        "lines": [{ "start": 88, "end": 91 }],
-        "category": "efficiency",
-        "severity": "high",
-        "suggestions": [
-          "Cache conv_int(InitialState) before the loop: 'variable initialStateInt : integer := conv_int(InitialState);'",
-          "Use the cached value in the loop: 'traceback_table(3-initialStateInt)(7-i)(2-InputLevel)'"
-        ],
-        "reasoning": "Function calls with the same argument are redundant. Caching the result eliminates 8 redundant function calls per clock cycle, reducing computation overhead."
-      },
-      {
-        "id": "redundant_conv_int_in_traceback_loop",
-        "description": "Multiple redundant conv_int() calls with same arguments within traceback loop iteration",
-        "lines": [{ "start": 111, "end": 116 }],
-        "category": "efficiency",
-        "severity": "high",
-        "suggestions": [
-          "Cache conv_int(InitialState) before the loop: 'variable initialStateInt : integer := conv_int(InitialState);'",
-          "Cache conv_int(currentState) at start of each iteration: 'variable currentStateInt : integer := conv_int(currentState);'",
-          "Cache conv_int(temp_output) after assignment: 'variable tempOutputInt : integer := conv_int(temp_output);'",
-          "Use cached values in array indexing operations"
-        ],
-        "reasoning": "In each loop iteration: conv_int(InitialState) is called once (line 112), conv_int(currentState) is called twice (lines 113-114), and conv_int(temp_output) is called twice (lines 113-114). Since InitialState doesn't change during the loop, it can be cached before the loop. The other two can be cached at the start of each iteration to eliminate redundant calls."
-      },
-      {
-        "id": "complex_nested_indexing_repeated_calculations",
-        "description": "Complex nested array indexing with repeated arithmetic calculations that could be cached",
+        "id": "while_loops_instead_of_for_loops",
+        "description": "Using while loops with manual counter increment for fixed iteration counts instead of for loops",
         "lines": [
-          { "start": 89, "end": 89 },
-          { "start": 112, "end": 114 }
+          { "start": 88, "end": 91 },
+          { "start": 101, "end": 107 },
+          { "start": 111, "end": 116 },
+          { "start": 121, "end": 124 }
         ],
         "category": "efficiency",
         "severity": "medium",
         "suggestions": [
-          "Pre-calculate array indices: 'variable tableIndex : integer := 3-conv_int(InitialState); variable rowIndex : integer := 7-i; variable colIndex : integer := 2-InputLevel;'",
-          "Use pre-calculated indices: 'traceback_table(tableIndex)(rowIndex)(colIndex)'",
-          "Cache intermediate indexing results to avoid recalculating nested expressions"
+          "Replace 'while i < 8 loop' (lines 88, 101, 121) with 'for i in 0 to 7 loop' and remove manual i initialization/increment",
+          "Replace 'while i < TraceBackDepth loop' (line 111) with 'for i in 0 to TraceBackDepth-1 loop' and remove manual i control",
+          "For loops are more synthesizer-friendly, easier to read, and allow better optimization by synthesis tools"
         ],
-        "reasoning": "Complex nested indexing expressions like '3-conv_int(InitialState)', '7-i', '7-chosenPathIndex', and '2-InputLevel' are recalculated in each iteration. Pre-calculating and caching these values reduces redundant arithmetic operations."
+        "reasoning": "While loops with manual counter control (i := 0; while i < N loop; i := i + 1) are inefficient for fixed iteration counts. For loops with explicit bounds are preferred because they: (1) are more readable, (2) allow synthesis tools to better optimize, (3) eliminate manual counter management, and (4) make loop bounds immediately clear."
+      },
+      {
+        "id": "array_reset_with_loop",
+        "description": "Using loop to reset array elements to zero instead of aggregate assignment",
+        "lines": [{ "start": 121, "end": 124 }],
+        "category": "efficiency",
+        "severity": "medium",
+        "suggestions": [
+          "Replace loop with aggregate assignment: 'TracebackResult := (others => 0);'",
+          "This is more concise, easier to read, and can be optimized better by synthesis tools"
+        ],
+        "reasoning": "Loop-based array initialization is verbose and harder to optimize. Aggregate assignment with 'others' clause is cleaner, more idiomatic VHDL, and clearly expresses intent to reset all elements."
       }
     ],
     "metadata": {
-      "totalIssues": 4,
+      "totalIssues": 2,
       "criticalIssues": 0,
-      "highIssues": 2,
+      "highIssues": 0,
       "mediumIssues": 2,
       "lowIssues": 0,
       "categories": ["efficiency"]

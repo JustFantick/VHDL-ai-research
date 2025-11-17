@@ -9,17 +9,16 @@
     "issues": [
       {
         "id": "inconsistent_keyword_casing",
-        "description": "Inconsistent keyword casing - using uppercase TYPE, IS, ARRAY, TO, OF, STD_LOGIC_VECTOR, DOWNTO while rest of code uses lowercase keywords",
+        "description": "Inconsistent keyword casing - mixing uppercase (LIBRARY, USE, TYPE, IS, ARRAY) with lowercase keywords within same file",
         "lines": [{ "start": 1, "end": 3 }, { "start": 16, "end": 16 }],
         "category": "style",
         "severity": "medium",
         "suggestions": [
-          "Use lowercase library clause: 'library ieee;'",
-          "Use lowercase use clauses: 'use ieee.std_logic_1164.all;' and 'use ieee.numeric_std.all;'",
-          "Use lowercase keywords consistently: 'type ram_array_t is array (0 to 127) of std_logic_vector(7 downto 0);'",
-          "Follow modern VHDL style conventions with lowercase keywords throughout the file"
+          "Use consistent lowercase keywords: 'library ieee;', 'use ieee.std_logic_1164.all;', 'type ram_array_t is array...'",
+          "Or use consistent uppercase keywords: 'LIBRARY IEEE;', 'USE IEEE.STD_LOGIC_1164.ALL;', 'TYPE ram_array_t IS ARRAY...'",
+          "The file should use one style consistently, not mix both"
         ],
-        "reasoning": "Old-style VHDL used uppercase keywords, but modern VHDL style conventions prefer lowercase. Mixing styles within the same file (library/use clauses and type declaration) creates inconsistency and reduces readability."
+        "reasoning": "The file mixes uppercase keywords (LIBRARY, USE, TYPE, IS, ARRAY, TO, OF, STD_LOGIC_VECTOR, DOWNTO) with lowercase keywords elsewhere. This inconsistency within the same file violates style guidelines and reduces readability."
       },
       {
         "id": "redundant_type_conversions",

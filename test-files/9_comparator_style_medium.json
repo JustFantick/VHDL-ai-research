@@ -8,23 +8,23 @@
   "groundTruth": {
     "issues": [
       {
-        "id": "uppercase_keywords",
-        "description": "Old-style uppercase keywords (ENTITY, PORT, END) instead of lowercase",
-        "lines": [{ "start": 4, "end": 9 }],
+        "id": "missing_spaces_in_port_declaration",
+        "description": "Missing spaces after colons in port declaration (a:in instead of a : in)",
+        "lines": [{ "start": 6, "end": 7 }],
         "category": "style",
-        "severity": "medium",
+        "severity": "low",
         "suggestions": [
-          "Use lowercase keywords: 'entity', 'port', 'end' for modern VHDL style"
+          "Add spaces around colons: 'a : in std_logic_vector(6 downto 0);' and 'y : out std_logic;'"
         ],
-        "reasoning": "Modern VHDL style conventions prefer lowercase keywords. Uppercase keywords are outdated and reduce code readability."
+        "reasoning": "While not required by VHDL syntax, consistent spacing improves code readability. This is a minor style preference."
       }
     ],
     "metadata": {
       "totalIssues": 1,
       "criticalIssues": 0,
       "highIssues": 0,
-      "mediumIssues": 1,
-      "lowIssues": 0,
+      "mediumIssues": 0,
+      "lowIssues": 1,
       "categories": ["style"]
     }
   }
