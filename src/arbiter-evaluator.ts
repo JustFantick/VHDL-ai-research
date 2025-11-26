@@ -79,27 +79,38 @@ interface EvaluationResult {
 
 class ArbiterEvaluator {
   private aiService: AIProviderService;
-  private arbiterConfig = MODEL_CONFIGS.find(
-    (m) => m.name === "Claude Sonnet 4.5"
-  )!;
+  private arbiterConfig: ModelConfig | undefined;
   private testFilesDir = path.join(process.cwd(), "test-files");
   private responsesDir = path.join(process.cwd(), "results", "responses");
   private outputDir = path.join(process.cwd(), "results", "normalyzed");
   private results: EvaluationResult[] = [];
 
-  constructor() {
+  constructor(modelName: string = "Claude Sonnet 4.5") {
     this.aiService = new AIProviderService();
+    this.arbiterConfig = MODEL_CONFIGS.find((m) => m.name === modelName);
+
+    if (!this.arbiterConfig) {
+      console.warn(
+        `Warning: Arbiter model '${modelName}' not found in config. Using defaults or it might fail.`
+      );
+    }
   }
 
-  async run(specificFile?: string) {
+  async run(specificFiles: string[] = []) {
     console.log("🔍 Starting arbiter evaluation...\n");
 
-    if (specificFile) {
-      console.log(`   Filtering for specific response file: ${specificFile}\n`);
+    if (specificFiles.length > 0) {
+      console.log(
+        `   Filtering for specific response files: ${specificFiles.join(
+          ", "
+        )}\n`
+      );
     }
 
     const groundTruthFiles = await this.loadGroundTruthFiles();
-    const responseFilesByTest = await this.loadAndGroupResponseFiles(specificFile);
+    const responseFilesByTest = await this.loadAndGroupResponseFiles(
+      specificFiles
+    );
 
     let successCount = 0;
     let failureCount = 0;
@@ -174,17 +185,20 @@ class ArbiterEvaluator {
     return groundTruthFiles;
   }
 
-  private async loadAndGroupResponseFiles(specificFile?: string): Promise<
-    Map<string, ResponseFile[]>
-  > {
+  private async loadAndGroupResponseFiles(
+    specificFiles: string[] = []
+  ): Promise<Map<string, ResponseFile[]>> {
     const files = await fs.readdir(this.responsesDir);
     let jsonFiles = files.filter((f) => f.endsWith(".json"));
 
-    if (specificFile) {
-      jsonFiles = jsonFiles.filter((f) => f === specificFile);
-      if (jsonFiles.length === 0) {
-        console.log(`⚠️  File ${specificFile} not found in responses directory`);
-      }
+    if (specificFiles.length > 0) {
+      jsonFiles = jsonFiles.filter((f) => specificFiles.includes(f));
+
+      specificFiles.forEach((file) => {
+        if (!jsonFiles.includes(file)) {
+          console.log(`⚠️  File ${file} not found in responses directory`);
+        }
+      });
     }
 
     const grouped = new Map<string, ResponseFile[]>();
@@ -306,7 +320,7 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
     prompt: string
   ): Promise<{ content: string; usage: TokenUsage }> {
     if (!this.arbiterConfig) {
-      throw new Error("Arbiter model (Claude Sonnet 4.5) not found in config");
+      throw new Error("Arbiter model not configured or found");
     }
 
     return await this.aiService.sendPromptWithUsage(this.arbiterConfig, prompt);
@@ -571,10 +585,28 @@ Respond ONLY with valid JSON. Do not include any text outside the JSON structure
 
 async function main() {
   try {
-    const specificFile = process.argv[2];
-    
-    const evaluator = new ArbiterEvaluator();
-    await evaluator.run(specificFile);
+    const args = process.argv.slice(2);
+    let modelName = "Claude Sonnet 4.5";
+    const specificFiles: string[] = [];
+
+    for (let i = 0; i < args.length; i++) {
+      if (args[i] === "--model") {
+        if (i + 1 < args.length) {
+          modelName = args[i + 1];
+          i++; // Skip next arg
+        } else {
+          console.error("Error: --model flag requires a value");
+          process.exit(1);
+        }
+      } else {
+        specificFiles.push(args[i]);
+      }
+    }
+
+    console.log(`Using arbiter model: ${modelName}`);
+
+    const evaluator = new ArbiterEvaluator(modelName);
+    await evaluator.run(specificFiles);
   } catch (error) {
     console.error("Fatal error:", error);
     process.exit(1);
