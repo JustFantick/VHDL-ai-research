@@ -29,15 +29,27 @@
           "Add spaces after commas in sensitivity list: 'process(x0, x1, S0, S1, S2, S3)' instead of 'process(x0,x1,S0,S1,S2,S3)'"
         ],
         "reasoning": "Missing spaces after commas in lists reduces readability and violates VHDL style guidelines for comma-separated lists."
+      },
+      {
+        "id": "combinational_logic_in_process",
+        "description": "Combinational logic implemented in process instead of concurrent assignments",
+        "lines": [{ "start": 24, "end": 37 }, { "start": 39, "end": 46 }],
+        "category": "efficiency",
+        "severity": "medium",
+        "suggestions": [
+          "Replace processes with concurrent signal assignments",
+          "Use selected signal assignments (with-select) for the decoder logic"
+        ],
+        "reasoning": "Using processes for simple combinational logic is unnecessarily verbose and can be less efficient than concurrent assignments."
       }
     ],
     "metadata": {
-      "totalIssues": 2,
+      "totalIssues": 3,
       "criticalIssues": 0,
       "highIssues": 0,
-      "mediumIssues": 2,
+      "mediumIssues": 3,
       "lowIssues": 0,
-      "categories": ["style"]
+      "categories": ["style", "efficiency"]
     }
   }
 }

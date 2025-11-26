@@ -8,18 +8,6 @@
   "groundTruth": {
     "issues": [
       {
-        "id": "inconsistent_port_formatting",
-        "description": "Inconsistent port declaration formatting - closing parenthesis on same line instead of separate line",
-        "lines": [{ "start": 11, "end": 11 }],
-        "category": "style",
-        "severity": "low",
-        "suggestions": [
-          "Move closing parenthesis to separate line: 'F : out unsigned(15 downto 0)' on line 11, then ');' on next line",
-          "Follow consistent formatting style for port declarations throughout the entity"
-        ],
-        "reasoning": "The port declaration has the opening parenthesis on a separate line (line 6) but the closing parenthesis on the same line as the last port (line 11). This inconsistent formatting reduces code readability and violates style guidelines."
-      },
-      {
         "id": "inconsistent_library_capitalization",
         "description": "Inconsistent capitalization in library/use clauses - mixing uppercase (IEEE) and lowercase (std_logic_1164, numeric_std)",
         "lines": [{ "start": 1, "end": 3 }],
@@ -58,11 +46,11 @@
       }
     ],
     "metadata": {
-      "totalIssues": 4,
+      "totalIssues": 3,
       "criticalIssues": 0,
       "highIssues": 1,
-      "mediumIssues": 2,
-      "lowIssues": 1,
+      "mediumIssues": 1,
+      "lowIssues": 0,
       "categories": ["style", "logic", "efficiency"]
     }
   }

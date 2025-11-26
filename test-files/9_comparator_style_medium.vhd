@@ -1,10 +1,10 @@
-library ieee;
+library IEEE;
 use ieee.std_logic_1164.all;
 
 ENTITY comparator IS
     PORT(
-        a:in std_logic_vector(6 downto 0);
-        y:out std_logic
+        a : in std_logic_vector(6 downto 1);
+        y : out std_logic
     );
 END comparator;
 

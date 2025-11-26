@@ -8,23 +8,23 @@
   "groundTruth": {
     "issues": [
       {
-        "id": "missing_spaces_in_port_declaration",
-        "description": "Missing spaces after colons in port declaration (a:in instead of a : in)",
-        "lines": [{ "start": 6, "end": 7 }],
+        "id": "inconsistent_capitalization_library",
+        "description": "Inconsistent capitalization of library names ('IEEE' vs 'ieee')",
+        "lines": [{ "start": 1, "end": 2 }],
         "category": "style",
-        "severity": "low",
+        "severity": "medium",
         "suggestions": [
-          "Add spaces around colons: 'a : in std_logic_vector(6 downto 0);' and 'y : out std_logic;'"
+          "Use consistent capitalization for library names (either all uppercase 'IEEE' or all lowercase 'ieee')"
         ],
-        "reasoning": "While not required by VHDL syntax, consistent spacing improves code readability. This is a minor style preference."
+        "reasoning": "The file uses 'library IEEE;' but then 'use ieee.std_logic_1164.all;'. VHDL style guidelines recommend consistent capitalization within the same file."
       }
     ],
     "metadata": {
       "totalIssues": 1,
       "criticalIssues": 0,
       "highIssues": 0,
-      "mediumIssues": 0,
-      "lowIssues": 1,
+      "mediumIssues": 1,
+      "lowIssues": 0,
       "categories": ["style"]
     }
   }
