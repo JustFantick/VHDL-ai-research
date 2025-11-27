@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity generic_counter
+entity generic_counter is
     generic(
         WIDTH : integer := 4
     );
@@ -11,9 +11,11 @@ entity generic_counter
         reset : in std_logic;
         counter : out std_logic_vector(WIDTH - 1 downto 0)
     );
+end entity generic_counter;
 
 architecture behavioral of generic_counter is
     signal counter_up : unsigned(WIDTH - 1 downto 0);
+    variable temp : integer;
 begin
     process(clk)
     begin
@@ -25,5 +27,6 @@ begin
             end if;
         end if;
     end process;
-    counter <= std_logic_vector(counter_up);
+    
+    counter <= counter_up;
 end behavioral;

@@ -8,13 +8,13 @@
   "groundTruth": {
     "issues": [
       {
-        "id": "missing_semicolon_generic",
-        "description": "Missing semicolon after generic declaration",
-        "lines": [{ "start": 7, "end": 7 }],
+        "id": "missing_semicolon_signal",
+        "description": "Missing semicolon after signal declaration",
+        "lines": [{ "start": 17, "end": 17 }],
         "category": "syntax",
         "severity": "critical",
-        "suggestions": ["Add semicolon after closing parenthesis: ');'"],
-        "reasoning": "VHDL requires semicolons after generic declarations in entity declarations. Missing semicolon will cause compilation error."
+        "suggestions": ["Add semicolon at the end of the signal declaration: 'signal shreg : std_logic_vector(DEPTH - 1 downto 0);'"],
+        "reasoning": "VHDL requires semicolons to terminate signal declarations. Missing semicolon will cause compilation error."
       },
       {
         "id": "missing_end_if",

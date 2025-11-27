@@ -4,7 +4,7 @@ use ieee.std_logic_1164.all;
 entity reg_multifunc is
     generic(
         DEPTH : integer := 32
-    )
+    );
     port(
         clk : in std_logic;
         clken : in std_logic;
@@ -14,7 +14,7 @@ entity reg_multifunc is
 end reg_multifunc;
 
 architecture behavioral of reg_multifunc is
-    signal shreg : std_logic_vector(DEPTH - 1 downto 0);
+    signal shreg : std_logic_vector(DEPTH - 1 downto 0)
 begin
     process(clk)
     begin

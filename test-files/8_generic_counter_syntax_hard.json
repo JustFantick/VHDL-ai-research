@@ -8,24 +8,24 @@
   "groundTruth": {
     "issues": [
       {
-        "id": "missing_is_keyword",
-        "description": "Missing 'is' keyword after 'entity generic_counter' declaration",
-        "lines": [{ "start": 5, "end": 5 }],
+        "id": "variable_in_architecture",
+        "description": "Variable declaration in architecture declarative region",
+        "lines": [{ "start": 18, "end": 18 }],
         "category": "syntax",
         "severity": "critical",
-        "suggestions": ["Add 'is' keyword: 'entity generic_counter is'"],
-        "reasoning": "VHDL requires the 'is' keyword after entity declarations. Missing 'is' keyword will cause compilation error."
+        "suggestions": ["Move variable declaration inside a process or change to 'signal'"],
+        "reasoning": "Variables can only be declared within processes, functions, or procedures. Declaring a variable in the architecture region is a syntax error."
       },
       {
-        "id": "missing_end_entity",
-        "description": "Missing 'end generic_counter;' to close entity declaration",
-        "lines": [{ "start": 13, "end": 14 }],
+        "id": "type_mismatch_assignment",
+        "description": "Type mismatch in assignment: assigning 'unsigned' to 'std_logic_vector'",
+        "lines": [{ "start": 31, "end": 31 }],
         "category": "syntax",
         "severity": "critical",
         "suggestions": [
-          "Add 'end generic_counter;' after the closing parenthesis of port declaration"
+          "Cast the unsigned signal to std_logic_vector: 'counter <= std_logic_vector(counter_up);'"
         ],
-        "reasoning": "Every entity declaration must be closed with 'end entity_name;'. Missing end statement will cause compilation error."
+        "reasoning": "VHDL is strongly typed. Direct assignment between 'unsigned' and 'std_logic_vector' is not allowed without type conversion."
       }
     ],
     "metadata": {
