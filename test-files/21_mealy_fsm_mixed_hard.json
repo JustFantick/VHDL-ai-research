@@ -8,6 +8,15 @@
   "groundTruth": {
     "issues": [
       {
+        "id": "missing_is_in_case",
+        "description": "Missing 'is' keyword in case statement",
+        "lines": [{ "start": 28, "end": 28 }],
+        "category": "syntax",
+        "severity": "critical",
+        "suggestions": ["Add 'is' keyword: 'case curr_state is'"],
+        "reasoning": "VHDL syntax for case statements requires the 'is' keyword: 'case expression is'. Missing this keyword will cause a compilation error."
+      },
+      {
         "id": "redundant_default_assignment",
         "description": "Redundant default assignment of next_state before case statement that gets overwritten in every branch",
         "lines": [{ "start": 27, "end": 27 }],
@@ -34,13 +43,12 @@
       }
     ],
     "metadata": {
-      "totalIssues": 2,
-      "criticalIssues": 0,
+      "totalIssues": 3,
+      "criticalIssues": 1,
       "highIssues": 1,
       "mediumIssues": 1,
       "lowIssues": 0,
-      "categories": ["efficiency", "logic"]
+      "categories": ["efficiency", "logic", "syntax"]
     }
   }
 }
-

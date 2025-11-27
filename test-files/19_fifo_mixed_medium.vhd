@@ -36,7 +36,7 @@ begin
                 counter := counter + 1;
             end if;
 
-            if rd = '1' and counter /= 0 then
+            if rd = '1' then
                 counter := counter - 1;
                 prev_rd := true;
             else

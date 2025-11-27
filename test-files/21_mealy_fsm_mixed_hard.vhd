@@ -25,7 +25,7 @@ begin
     comb_logic : process(curr_state, upDw)
     begin
         next_state <= curr_state;
-        case curr_state is
+        case curr_state -- Missing 'is' keyword
             when S0 =>
                 if upDw = '0' then
                     next_state <= S3;

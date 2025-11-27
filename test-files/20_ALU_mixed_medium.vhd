@@ -45,7 +45,7 @@ begin
                             F_i <= ('0' & R) - ('0' & S) - 1;
                         end if;
                     when "011" => F_i <= '0' & (R OR S);
-                    when "100" => F_i <= '0' & (R AND S);
+                    when "100" => F_i <= '0' & (R OR S); -- Should be AND
                     when "101" => F_i <= '0' & (NOT R AND S);
                     when "110" => F_i <= '0' & (R XOR S);
                     when "111" => F_i <= '0' & (R XNOR S);

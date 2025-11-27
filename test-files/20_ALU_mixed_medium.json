@@ -20,17 +20,16 @@
         "reasoning": "The code mixes uppercase 'IEEE' with lowercase 'std_logic_1164.all' and 'numeric_std.all' in the same file. This inconsistency violates style guidelines - either all uppercase or all lowercase should be used consistently."
       },
       {
-        "id": "swapped_cin_logic_subr",
-        "description": "SUBR operation has swapped carry-in logic - when cin='1' it subtracts 1, when cin='0' it doesn't, which is backwards",
-        "lines": [{ "start": 34, "end": 39 }],
+        "id": "incorrect_logic_operation",
+        "description": "Incorrect logic operation for opcode '100' - performs OR instead of expected AND (based on pattern and standard ALU ops)",
+        "lines": [{ "start": 48, "end": 48 }],
         "category": "logic",
         "severity": "high",
         "suggestions": [
-          "Fix SUBR operation: when cin='1' should be 'F_i <= ('0' & S) - ('0' & R);' without subtracting 1",
-          "When cin='0' should be 'F_i <= ('0' & S) - ('0' & R) - 1;' to subtract 1",
-          "The carry-in logic is reversed for the subtract operation"
+          "Change the operator to AND: 'when \"100\" => F_i <= '0' & (R AND S);'",
+          "Opcode '011' already performs OR, so '100' likely intended to perform AND"
         ],
-        "reasoning": "For subtraction with borrow (carry-in), when cin='1' (no borrow), the subtraction should proceed normally. When cin='0' (borrow), an additional 1 should be subtracted. The current implementation has this logic reversed, causing incorrect results for the SUBR operation."
+        "reasoning": "The opcode '100' performs an OR operation ('R OR S'), which is identical to the operation for opcode '011'. Standard ALU designs typically include AND, OR, XOR, etc. Given that OR is already covered, '100' was almost certainly intended to be AND."
       },
       {
         "id": "redundant_zero_addition",

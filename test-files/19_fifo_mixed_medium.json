@@ -56,16 +56,16 @@
         "reasoning": "A for loop is used to iterate from 0 to counter, checking if i equals counter, then assigning. This is inefficient as it creates unnecessary loop logic when a direct indexed assignment 'elem_array(counter) <= elem_in;' would be sufficient and more efficient."
       },
       {
-        "id": "if_else_prev_rd_logic_error",
-        "description": "Incorrect if-else logic for prev_rd: when rd='1' and counter=0, prev_rd is incorrectly set to false instead of being left unchanged",
+        "id": "counter_underflow_logic_error",
+        "description": "Missing underflow protection for counter when reading from empty FIFO",
         "lines": [{ "start": 39, "end": 44 }],
         "category": "logic",
         "severity": "high",
         "suggestions": [
-          "Use two separate if statements: 'if rd = '1' and counter /= 0 then prev_rd := true; end if; if rd = '0' then prev_rd := false; end if;'",
-          "The if-else structure incorrectly resets prev_rd to false when rd='1' but counter=0, which should leave prev_rd unchanged"
+          "Add check for empty FIFO: 'if rd = '1' and counter /= 0 then'",
+          "Prevent counter from decrementing below 0"
         ],
-        "reasoning": "The if-else structure causes prev_rd to be set to false whenever the condition 'rd='1' and counter/=0' is false, including when rd='1' but counter=0. This is incorrect because prev_rd should only be set to false when rd='0', and should remain unchanged when rd='1' but counter=0. Using two separate if statements fixes this logic error."
+        "reasoning": "The code decrements 'counter' whenever 'rd' is '1', without checking if 'counter' is greater than 0. If 'rd' is asserted when the FIFO is empty (counter = 0), 'counter' will underflow (decrement to -1 or wrap around for natural type), leading to undefined behavior or simulation errors."
       }
     ],
     "metadata": {
@@ -74,7 +74,7 @@
       "highIssues": 1,
       "mediumIssues": 1,
       "lowIssues": 2,
-      "categories": ["style", "syntax", "performance", "logic"]
+      "categories": ["style", "syntax", "efficiency", "logic"]
     }
   }
 }
