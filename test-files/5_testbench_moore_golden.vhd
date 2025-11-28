@@ -1,11 +1,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity tb_VHDL_Moore_FSM_Sequence_Detector is
-end tb_VHDL_Moore_FSM_Sequence_Detector;
+entity tb_vhdl_moore_fsm_sequence_detector is
+end tb_vhdl_moore_fsm_sequence_detector;
 
-architecture behavior of tb_VHDL_Moore_FSM_Sequence_Detector is
-    component VHDL_MOORE_FSM_Sequence_Detector
+architecture behavior of tb_vhdl_moore_fsm_sequence_detector is
+    component vhdl_moore_fsm_sequence_detector is
         port (
             clock : in std_logic;
             reset : in std_logic;
@@ -21,7 +21,7 @@ architecture behavior of tb_VHDL_Moore_FSM_Sequence_Detector is
 
     constant clock_period : time := 10 ns;
 begin
-    uut : VHDL_MOORE_FSM_Sequence_Detector port map (
+    uut : vhdl_moore_fsm_sequence_detector port map (
         clock => clock,
         reset => reset,
         sequence_in => sequence_in,
@@ -38,22 +38,47 @@ begin
 
     stim_proc : process
     begin
+        -- Initialize inputs
         sequence_in <= '0';
         reset <= '1';
-        wait for 30 ns;
+        wait for 30 ns; -- Hold reset
+        
+        -- Synchronize with clock falling edge to avoid race conditions
+        wait until falling_edge(clock);
         reset <= '0';
-        wait for 40 ns;
+        
+        -- Sequence: 1
+        wait until falling_edge(clock);
         sequence_in <= '1';
-        wait for 10 ns;
+        wait until falling_edge(clock);
+        -- Sequence: 10
         sequence_in <= '0';
-        wait for 10 ns;
+        wait until falling_edge(clock);
+        -- Sequence: 101 (not target)
         sequence_in <= '1';
-        wait for 20 ns;
+        
+        -- Reset and try target sequence: 1001
+        wait until falling_edge(clock);
+        sequence_in <= '0'; -- Reset sequence state or just continue
+        
+        -- Start target sequence 1-0-0-1
+        wait until falling_edge(clock);
+        sequence_in <= '1'; -- 1
+        wait until falling_edge(clock);
+        sequence_in <= '0'; -- 0
+        wait until falling_edge(clock);
+        sequence_in <= '0'; -- 0
+        wait until falling_edge(clock);
+        sequence_in <= '1'; -- 1 (Match expected here)
+        
+        wait until rising_edge(clock);
+        -- Check output after it settles
+        wait for 1 ns; 
+        assert detector_out = '1' report "Error: Sequence 1001 not detected" severity error;
+
+        wait until falling_edge(clock);
         sequence_in <= '0';
-        wait for 20 ns;
-        sequence_in <= '1';
-        wait for 20 ns;
-        sequence_in <= '0';
+        
         wait;
     end process;
-end;
+end behavior;
