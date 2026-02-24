@@ -2,6 +2,9 @@
 
 Research project evaluating and comparing 9 AI models (OpenAI GPT-5 family, Anthropic Claude 4 family, Google Gemini 2.5 family) in analyzing VHDL hardware description language code.
 
+All experimental results and calculated metrics available [here](https://docs.google.com/spreadsheets/d/1dj7MuzRLQNCZOWgsicb4e4ARpi4WKbilxtxJxJ-H_cU/edit?usp=sharing).
+
+
 ## Features
 
 - Tests 9 AI models via API (OpenAI, Anthropic, Google)
